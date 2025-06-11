@@ -1,6 +1,5 @@
-import { readFile, readFilesRecursively, writeFileSync } from "../../_shared/fs/fs"
-import { ERROR, LOG, OK, WARNING } from "../../_shared/log/log";
-
+import { FS } from '../../_shared/fs/fs';
+import { LOG } from '../../_shared/log/log';
 
 // icons: C:\Users\Robert Willemelis\.vscode\extensions\icons
 const ICON_FOLDER = '../../../../icons';
@@ -13,27 +12,26 @@ const CSS_INDEX_FILE = 'src/frontend/_framework/css/index.css';
 const AUTO_START = '/* AUTO-COMPONENT-CSS-START */';
 const AUTO_END = '/* AUTO-COMPONENT-CSS-END */';
 
-
 const getNewFolderSettings = (settings: any, folderPath: string, typePath: string, iconPath: string) => {
     if(folderPath.includes(typePath)){
         const subFolder = folderPath.split('/')[folderPath.split('/').length - 1];
-        
+
         if(!settings['material-icon-theme.folders.associations'][subFolder]){
             settings['material-icon-theme.folders.associations'][subFolder] = iconPath;
-            LOG(OK, `Added ${subFolder} to settings`);
+            LOG.OK(`Added ${subFolder} to settings`);
         }
     }
 }
 
 // read vscode settings file and get the value of the key
-const vscodeSettings = readFile(SETTINGS_FILE);
+const vscodeSettings = FS.readFile(SETTINGS_FILE);
 if(vscodeSettings){
     try {
 
         const settings = JSON.parse(vscodeSettings);
-        
+
         // file list of src/frontend
-        const folderList = readFilesRecursively(FRONTEND).filter((folder: any) => folder.type === 'folder');
+        const folderList = FS.readFilesRecursively(FRONTEND).filter((folder: any) => folder.type === 'folder');
         for(const folder of folderList){
             if(folder.path.indexOf(`${COMPONENTS}/`) !== -1){
                 getNewFolderSettings(settings, folder.path, `${COMPONENTS}/atoms/`, `${ICON_FOLDER}/folder-atom`);
@@ -45,12 +43,12 @@ if(vscodeSettings){
                 getNewFolderSettings(settings, folder.path, `${TEMPLATES}/`, `${ICON_FOLDER}/folder-template`);
             }
         }
-        writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 4));
-        LOG(OK, 'Settings updated');
-    } catch(e) {
-        LOG(ERROR, `${e}`)
+        FS.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 4));
+        LOG.OK('Settings updated');
+    } catch (e) {
+        LOG.FAIL(`${e}`);
     }
-}
+};
 
 
 // const syncComponentCSSImports = () => {

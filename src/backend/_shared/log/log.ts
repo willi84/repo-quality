@@ -1,52 +1,79 @@
-enum COLORS_FG  {
-    BLACK = '30',
-    RED = '31',
-    GREEN = '32',
-    YELLOW = '33',
-    BLUE = '34',
-    MAGENTA = '35',
-    CYAN = '36',
-    WHITE = '37',
-  }
-  enum COLORS_BG  {
-    BLACK  = '40',
-    RED  = '41',
-    GREEN  = '42',
-    YELLOW  = '43',
-    BLUE  = '44',
-    MAGENTA  = '45',
-    CYAN  = '46',
-    WHITE  = '47',
-  }
-  export const OK = 0;
-  export const ERROR = 1;
-  export const WARNING = 2;
-  export const INFO = 3;
-  export const DEBUG = 4;
-  
-  const colorize = (fg: COLORS_FG, output: string, bg: COLORS_BG) => {
-    const bgStr = (bg) ? `\u001b[${bg}m` : ``;
-    return `\u001b[${fg}m${bgStr}${output}\u001b[0m`;
-  };
-  export const LOG = (type: number, message: string, details = '', fg = COLORS_FG.WHITE, bg = COLORS_BG.BLACK ) => {
-    let output = '';
-    switch (type) {
-        case OK:
-            output += colorize(COLORS_FG.BLACK, ` OK ✓ `, COLORS_BG.GREEN) + `\t ${message} `;
-            break;
-        case DEBUG:
-            output += colorize(COLORS_FG.WHITE, ` DEBG `, COLORS_BG.BLUE) + `\t ${message} `;
-            break;
-        case ERROR:
-            output += colorize(COLORS_FG.BLACK, ` FAIL x `, COLORS_BG.RED) + ` ${message} `;
-            break;
-        case WARNING:
-            output += colorize(COLORS_FG.BLACK, ` WARN ! `, COLORS_BG.YELLOW) + ` ${message} `; break;
-        case INFO:
-            output += colorize(fg, ` ${message} `, bg) + `\t` + details ; break;
-        default:
-            output += colorize(COLORS_FG.BLACK, ` DEBG `, COLORS_BG.WHITE) + `\t ${message} `; 
-            break;
+import { colors } from './../colors';
+// TODO: move to other file
+// const isMicrosoft = os.release().toLocaleLowerCase().includes('microsoft');
+// const hasLinuxPlattform = process.platform.includes('linux');
+// const isVSCode = (process.env.TERM_PROGRAM && process.env.TERM_PROGRAM.includes('vscode'));
+// let noEmojis = isMicrosoft && hasLinuxPlattform && (!isVSCode);
+// https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
+
+export enum LogType {
+    OK = 'OK',
+    FAIL = 'FAIL',
+    WARN = 'WARN',
+    NEWLINE = 'NEWLINE',
+    INFO = 'INFO',
+    DEFAULT = 'DEFAULT',
+    INLINE = 'INLINE',
+    DEBUG = 'DEBUG',
+}
+
+export type COLOR_SET = {
+    id: string;
+    fg: string;
+    bg: string;
+};
+export const COLOR_SETS = {
+    [LogType.OK]: { id: 'OK', fg: colors.FgBlack, bg: colors.BgGreen },
+    [LogType.FAIL]: { id: 'FAIL', fg: colors.FgWhite, bg: colors.BgRed },
+    [LogType.WARN]: { id: 'WARN', fg: colors.FgWhite, bg: colors.BgYellow },
+    [LogType.INFO]: { id: 'INFO', fg: colors.FgBlack, bg: colors.BgWhite },
+    [LogType.DEFAULT]: {
+        id: 'DEFAULT',
+        fg: colors.FgWhite,
+        bg: colors.BgBlack,
+    },
+    [LogType.INLINE]: { id: 'INLINE', fg: colors.FgWhite, bg: colors.BgBlack },
+    [LogType.DEBUG]: { id: 'DEBUG', fg: colors.FgBlack, bg: colors.BgWhite },
+    // [LogType.NEWLINE]: { id: 'NEWLINE', fg: colors.FgWhite, bg: colors.BgBlack },
+};
+const getColorSet = (type: LogType): COLOR_SET => {
+    const resolvedType = type as keyof typeof COLOR_SETS;
+    const colorSet: COLOR_SET = COLOR_SETS[resolvedType] as COLOR_SET;
+    return colorSet;
+};
+export type LogOpts = {
+    icon?: string;
+    newline?: boolean;
+};
+const makeLogger = (type: LogType) => (msg: string, opts?: LogOpts) => {
+    LOG.logger(type, msg, opts || { icon: '', newline: false });
+};
+
+export const colorize = (msg: string, bg: string, fg: string) => {
+    const colorSet = ` ${fg} ${bg} `;
+    const result = `${colorSet}  ${msg}  ${colors.Reset} `;
+    return msg !== '' ? `${result}` : '';
+};
+
+export class LOG {
+    static colorize = colorize;
+    static output = (msg: string) => {
+        process.stdout.write(`${msg}`);
+    };
+    static logger(type: LogType, msg: string, opts?: LogOpts) {
+        const color = getColorSet(type);
+        const icon = opts?.icon || '';
+        const isInline = type === LogType.INLINE || type === LogType.DEFAULT;
+        const txt = isInline ? '' : `[${color.id}]`;
+        const status = LOG.colorize(txt, color.bg, color.fg);
+        const isNewline = type !== LogType.INLINE;
+        LOG.output(`${status}${icon}${msg}${isNewline ? '\n' : ''}`);
     }
-    console.log(output);
-  };
+    static OK = makeLogger(LogType.OK);
+    static FAIL = makeLogger(LogType.FAIL);
+    static WARN = makeLogger(LogType.WARN);
+    static INFO = makeLogger(LogType.INFO);
+    static DEFAULT = makeLogger(LogType.DEFAULT);
+    static INLINE = makeLogger(LogType.INLINE);
+    static DEBUG = makeLogger(LogType.DEBUG);
+}

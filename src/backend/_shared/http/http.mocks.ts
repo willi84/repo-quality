@@ -1,4 +1,4 @@
-import { HTTP_OBJECTS } from "../../index.d";
+import { HTTP_OBJECTS } from '../../index.d';
 
 const DOMAIN_1 = 'domain-1.de';
 const DOMAIN_2 = 'domain-2.de';
@@ -21,7 +21,7 @@ const SERVER = {
         X-Frame-Options: SAMEORIGIN
         Strict-Transport-Security: max-age=31536000;
         Referrer-Policy: no-referrer-when-downgrade`,
-}
+};
 const STATUS = {
     HTTP_301: `
         HTTP/1.1 301 Moved Permanently
@@ -41,16 +41,15 @@ const STATUS = {
         Date: ${DATE}
         Content-Length: 41739
         ETag: "6595577a-a30b"
-        ${SERVER.BASE}`
-}
-
+        ${SERVER.BASE}`,
+};
 
 export const MOCKED_URLS = {
     HTTP_UNKOWN: {
-        step1: 'https://wifi.inflightinternet.com'
+        step1: 'https://wifi.inflightinternet.com',
     },
     HTTP_200: {
-        step1: `https://www.${DOMAIN_1}/`
+        step1: `https://www.${DOMAIN_1}/`,
     },
     HTTP_200_FORWARD_1: {
         step1: `${DOMAIN_2}`,
@@ -61,7 +60,7 @@ export const MOCKED_URLS = {
         step2: `https://${DOMAIN_3}/`,
     },
     HTTP_404: {
-        step1: `https://www.${DOMAIN_4}/xx/`
+        step1: `https://www.${DOMAIN_4}/xx/`,
     },
     HTTP_404_FORWARD: {
         step1: `${DOMAIN_5}/xx`,
@@ -74,60 +73,58 @@ export const MOCKED_URLS = {
         step3: `http://${DOMAIN_6}/xx/`,
         step4: `https://${DOMAIN_6}/xx/`,
         step5: `https://www.${DOMAIN_6}/xx/`,
-        step6: `https://www.${DOMAIN_6.replace('.de', '.com')}/xx/`
-    }
-}
+        step6: `https://www.${DOMAIN_6.replace('.de', '.com')}/xx/`,
+    },
+};
 
+const BASE_HTTP_OBJECT = {
+    protocol: 'http',
+    protocolVersion: '1.1',
+    contentType: 'text/html',
+    connection: 'keep-alive',
+    server: 'nginx/1.14.1',
+    date: DATE,
+};
 
 export const HTTP_OBJECT: HTTP_OBJECTS = {
     HTTP_301: {
-        'status': '301',
-        'statusMessage': 'Moved Permanently',
-        'protocol': 'http',
-        'protocolVersion': '1.1',
+        status: '301',
+        statusMessage: 'Moved Permanently',
         'http/1.1': '301 Moved Permanently',
-        'server': 'nginx/1.14.1',
-        'date': DATE,
-        'contentType': 'text/html',
-        'contentLength': '185',
-        'connection': 'keep-alive',
-        'location': `https://www.${DOMAIN_2}/`,
-        'xFrameOptions': 'SAMEORIGIN',
-        'strictTransportSecurity': 'max-age=31536000;',
-        'referrerPolicy': 'no-referrer-when-downgrade'
+        contentLength: '185',
+        location: `https://www.${DOMAIN_2}/`,
+        xFrameOptions: 'SAMEORIGIN',
+        strictTransportSecurity: 'max-age=31536000;',
+        referrerPolicy: 'no-referrer-when-downgrade',
+        ...BASE_HTTP_OBJECT,
     },
     HTTP_200: {
-        'status': '200',
-        'statusMessage': 'OK',
-        'protocol': 'http',
-        'protocolVersion': '1.1',
+        status: '200',
+        statusMessage: 'OK',
         'http/1.1': '200 OK',
-        'server': 'nginx/1.14.1',
-        'date': DATE,
-        'contentType': 'text/html',
-        'contentLength': '76980',
-        'lastModified': LAST_MODIFIED,
-        'connection': 'keep-alive',
-        'etag': '"65f7fcac-12cb4"',
-        'xFrameOptions': 'SAMEORIGIN',
-        'strictTransportSecurity': 'max-age=31536000;',
-        'referrerPolicy': 'no-referrer-when-downgrade',
-        'acceptRanges': 'bytes'
+        contentLength: '76980',
+        lastModified: LAST_MODIFIED,
+        etag: '"65f7fcac-12cb4"',
+        xFrameOptions: 'SAMEORIGIN',
+        strictTransportSecurity: 'max-age=31536000;',
+        referrerPolicy: 'no-referrer-when-downgrade',
+        acceptRanges: 'bytes',
+        ...BASE_HTTP_OBJECT,
     },
     HTTP_404: {
-        'status': '404',
-        'statusMessage': 'Not Found',
-        'protocol': 'http',
-        'protocolVersion': '1.1',
+        status: '404',
+        statusMessage: 'Not Found',
+        protocol: 'http',
+        protocolVersion: '1.1',
         'http/1.1': '404 Not Found',
-        'server': 'nginx/1.14.1',
-        'date': DATE,
-        'contentType': 'text/html',
-        'contentLength': '41739',
-        'connection': 'keep-alive',
-        'etag': '"6595577a-a30b"'
+        server: 'nginx/1.14.1',
+        date: DATE,
+        contentType: 'text/html',
+        contentLength: '41739',
+        connection: 'keep-alive',
+        etag: '"6595577a-a30b"',
     },
-}
+};
 
 export const MOCKED_HTTP_STATUS = {
     HTTP_UNKNOWN: {
@@ -190,7 +187,6 @@ export const MOCKED_HTTP_STATUS = {
             ${STATUS.HTTP_404}
         `,
     },
-    
     HTTP_200_FORWARD_2: {
         step1: `
             HTTP/1.0 308 Permanent Redirect
@@ -215,7 +211,7 @@ export const MOCKED_HTTP_STATUS = {
             x-vercel-id: fra1::296pw-1711747937798-0d4aec759f9a
             content-length: 1900
         `,
-    }
-}
+    },
+};
 
 export const HTTP_UNKNOWN = `curl: (28) Connection timed out after 2000 milliseconds`;

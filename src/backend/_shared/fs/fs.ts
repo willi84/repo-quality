@@ -1,110 +1,175 @@
 import * as fs from 'fs';
-import {LOG, DEBUG, ERROR} from './../log/log';
-import {command} from './../cmd/cmd';
-import path from 'path';
+import { LOG } from './../log/log';
+import * as path from 'path';
+import * as convert from './../convert/convert';
 
-const hasFail = (error: string, errorMsg: string) => {
-  if (error) {
-    LOG(ERROR, `${errorMsg} ${error}`);
-    return true;
-  }
-  return false;
-};
-export const getFolder = (file: string): string => {
-  if (!file) {
-    LOG(DEBUG, `path ${file} not exists`);
-  }
-  const parts = file.split('/');
-  const filename = parts[parts.length -1];
-  const replaceable = filename.indexOf('.') !== -1 ? filename: '';
-  const folder = file.replace(replaceable, '');
-  return folder;
-};
-export const getFirstFolder = (file: string) => {
-  if (!file) {
-    LOG(DEBUG, `path ${file} not exists`);
-  }
-  const parts = file.split('/');
-  const filename = parts[parts.length - 1];
-  const replaceable = filename.indexOf('.') !== -1 ? filename : '';
-  const folder = file.replace(replaceable, '');
-  const folderParts = folder.split('/').filter((name) => name !== '');
-  return folderParts[0];
-};
-export const createFolder = (folder: string) => {
-  if (!fs.existsSync(folder)) {
-    fs.mkdirSync(folder, {recursive: true});
-    LOG(DEBUG, `folder ${folder} created`);
-  }
-}
-// TODO: min node.js 14.14
-export const removeFolder = (folder: string, doLog = false) => {
-  if (fs.existsSync(folder)) {
-    fs.rmSync(folder, {recursive: true, force: true});
-    doLog && LOG(DEBUG, `folder ${folder} removed`);
-  }
-};
-export const removeFile = (filePath: string, doLog = false) => {
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-    doLog && LOG(DEBUG, `file ${filePath} removed`);
-  }
-};
-export const moveFolder = (oldFolder: string, newFolder: string) => {
-  // console.log(fileExists(oldFolder));
-  if (!fileExists(newFolder)) {
-    createFolder(newFolder);
-  }
-  fs.renameSync(oldFolder, newFolder);
-};
-export const writeFileSync = (path: string, rawData: string, option = 'replace', createDirectory = false) => {
-  const folder = getFolder(path);
-
-  const data: string = (typeof rawData === 'string' ? rawData : JSON.stringify(rawData, null, 4) || '');
-  // LOG(DEBUG, command('pwd'));
-  const options = (option === 'attach') ? {flag: 'a+'} : {};
-  if (createDirectory) {
-    createFolder(folder);
-  }
-  fs.writeFileSync( path, data, options );
-};
-
-export const fileExists = (path: string) => {
-  return fs.existsSync(path);
-}
-export const readFile = (path: string, createIfNotExits = false, options: any = {}, customError: string = ``) => {
-  if (!options) {
-    options = {};
-  }
-  options['encoding'] = 'utf8';
-  try {
-    // , { flag: 'wx' }
-    // let exists = fs.existsSync(path);
-    return fs.readFileSync(path, options).toString();
-  } catch (error: any) {
-    hasFail(error, customError);
-  }
-};
-export const getFileList = (path: string) => {
-  const files: Array<string> = [];
-  fs.readdirSync(path).forEach(file => {
-    files.push(file);
-  });
-  return files;
+export enum Status {
+    ERROR = -1,
+    REMOVED = 0,
+    CREATED = 1,
+    ALREADY_EXISTS = 2,
+    NOT_EXISTS = 3,
+    NOT_EMPTY = 4,
+    OVERWRITTEN = 5,
+    EXTENDED = 6,
+    NO_CHANGES = 7,
 }
 
-export function readFilesRecursively(dir: string, fileList: any[] = []): any[] {
-  const files = fs.readdirSync(dir);
+export const size = (value: string | object) => {
+    if (typeof value === 'object') {
+        value = JSON.stringify(value);
+    }
+    const size = Buffer.from(value).length;
+    return size;
+};
 
-  files.forEach(file => {
-      const filePath = path.join(dir, file);
-      if (fs.statSync(filePath).isDirectory()) {
-          readFilesRecursively(filePath, fileList);
-          fileList.push({ path: filePath, type: 'folder'});
-      } else {
-          fileList.push({ path: filePath, type: 'file'});
-      }
-  });
+// https://stackoverflow.com/a/54387221
+const readFilesRecursively = (
+    dir: string,
+    fileList: any[] = [],
+    recursive: boolean
+): any[] => {
+    if (!fs.existsSync(dir)) {
+        LOG.WARN(`Directory ${dir} does not exist.`);
+        return fileList;
+    }
+    const files = fs.readdirSync(dir);
+    if (recursive === false) {
+        console.log(files);
+    }
+    files.forEach((file: string) => {
+        const filePath = path.join(dir, file);
+        if (fs.statSync(filePath).isDirectory()) {
+            if (recursive === true) {
+                readFilesRecursively(filePath, fileList, recursive);
+                fileList.push({ path: filePath, type: 'folder' });
+            }
+        } else {
+            fileList.push({ path: filePath, type: 'file' });
+        }
+    });
+    return fileList;
+};
 
-  return fileList;
+export class FS {
+    static exists = (path: string): boolean => {
+        return fs.existsSync(path);
+    };
+    static hasFolder = FS.exists; // alias for consistency
+    static hasFile = FS.exists; // alias for consistency
+    static createFolder(folder: string) {
+        if (!fs.existsSync(folder)) {
+            fs.mkdirSync(folder, { recursive: true });
+        }
+    }
+    static removeFolder(folder: string): void {
+        if (fs.existsSync(folder)) {
+            fs.rmSync(folder, { recursive: true, force: true });
+        }
+    }
+    static getFolder(file: string): string {
+        const parts = file.split('/');
+        const filename = parts[parts.length - 1];
+        const replaceable = filename.indexOf('.') !== -1 ? filename : '';
+        const folder = file.replace(replaceable, '');
+        return folder.replace(/\/$/, ''); // Remove trailing slash if exists
+    }
+    static getFirstFolder(file: string) {
+        const folder = FS.getFolder(file);
+        const folderParts = folder.split('/').filter((name) => name !== '');
+        return folderParts.length > 0 ? folderParts[0] : '';
+    }
+    static moveFolder(oldFolder: string, newFolder: string): void {
+        if (!FS.hasFolder(oldFolder)) {
+            LOG.WARN(`Old folder does not exist: ${oldFolder}`);
+            return;
+        }
+        if (!FS.hasFolder(newFolder)) {
+            FS.createFolder(newFolder);
+        }
+        fs.renameSync(oldFolder, newFolder);
+    }
+    static readFile(
+        path: string,
+        createIfNotExits = false,
+        options: any = {},
+        customError: string = ``
+    ) {
+        if (!options) {
+            options = {};
+        }
+        options['encoding'] = 'utf8';
+
+        try {
+            // , { flag: 'wx' }
+            let data;
+            const isJSON = path.indexOf('.json') !== -1;
+            const fileStream = fs.readFileSync(path);
+
+            let str = fileStream.toString();
+            if (isJSON) {
+                const json = convert.stringToJSON(str);
+                if (json.isValid) {
+                    data = json.data;
+                } else {
+                    data = str;
+                }
+            } else {
+                data = str;
+            }
+            return data;
+        } catch (error: any) {
+            LOG.FAIL(`readFileSync: ${error}`);
+        }
+    }
+    static writeFile(
+        path: string,
+        rawData: string | object,
+        option = 'replace',
+        createDirectory = true
+    ) {
+        const folder = FS.getFolder(path);
+
+        const data: string =
+            typeof rawData === 'string'
+                ? rawData
+                : JSON.stringify(rawData, null, 4);
+        const options = option === 'attach' ? { flag: 'a+' } : {};
+        if (createDirectory) {
+            if (!FS.hasFolder(folder)) {
+                FS.createFolder(folder);
+            }
+            fs.writeFileSync(path, data, options);
+        } else {
+            // TODO: stabilize
+            if (FS.hasFolder(folder)) {
+                LOG.WARN(`Folder already exists: ${folder}`);
+                fs.writeFileSync(path, data, options);
+            }
+        }
+    }
+
+    static removeFile(filePath: string): void {
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+    }
+    static list(path: string, recursive = true, fullPath = true) {
+        let pathExits = true;
+        if (!fs.existsSync(path)) {
+            LOG.WARN(`Path ${path} does not exist.`);
+            return [];
+        }
+        let result: string[] = readFilesRecursively(path, [], recursive)
+            .filter((file: any) => file.type === 'file')
+            .map((file: any) =>
+                fullPath ? file.path : path.split('/').pop() || ''
+            );
+        return result;
+    }
+
+    static size(file: string): number {
+        const content = FS.readFile(file) || '';
+        return size(content);
+    }
 }
