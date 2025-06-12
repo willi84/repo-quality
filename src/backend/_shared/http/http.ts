@@ -5,11 +5,14 @@
  * @version 1.0.0
  */
 
-import { HTTPStatusBase, HTTP_STATUS } from '../../index.d';
+import { HTTPStatusBase } from '../../index.d';
 import { command } from '../cmd/cmd';
 import { LOG } from '../log/log';
-import { CURL_CONFIG_STATUS } from './http.config';
+import { CURL_CONFIG_STATUS, STANDARD_CURL_TIMEOUT } from './http.config';
 
+export const getNumberString = (value: number): string => {
+    return value.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+};
 export const splitLine = (line: string) => {
     const matchesColon = line.match(/^([^\s]+)\:\s(.*)/); // KEY: value
     const matchesSpace = line.match(/^([^\s]+)\s(.*)/); // KEY value
@@ -71,10 +74,17 @@ export const getHttpItem = (input: string): HTTPStatusBase => {
     return httpItem;
 };
 
-const getHTTPStatus = (url: string, timeout?: number): HTTPStatusBase => {
-    // const timeoutConfig = timeout? CURL_CONFIG_STATUS.replace(/(\d*\.\d*)/, timeout.toString()) : CURL_CONFIG_STATUS;
-    // console.log(timeoutConfig)
-    const status = command(`curl -I ${url} ${CURL_CONFIG_STATUS}`);
+export const getHTTPStatus = (
+    url: string,
+    timeout?: number
+): HTTPStatusBase => {
+    const oldTime = getNumberString(STANDARD_CURL_TIMEOUT);
+    const newTime = getNumberString(timeout || STANDARD_CURL_TIMEOUT);
+    let config = timeout
+        ? CURL_CONFIG_STATUS.replace(oldTime, newTime)
+        : CURL_CONFIG_STATUS;
+    const fullCommand = `curl -I ${url} ${config}`;
+    const status = command(`${fullCommand}`);
     const httpItem = getHttpItem(status);
     return httpItem;
 };
@@ -98,10 +108,11 @@ export const getHttpStatusItem = (
     const initialUrl = url;
     const maxRedirects = 5;
     let redirects = 0;
+    let httpItem: HTTPStatusBase = {} as HTTPStatusBase;
     if (forwarding) {
         while (forwarding) {
             redirects += 1;
-            const httpItem = getHTTPStatus(url, timeout);
+            httpItem = getHTTPStatus(url, timeout);
             if (redirects > maxRedirects) {
                 httpItem['maxRedirectsReached'] = 'true';
                 httpItem['lastStatus'] = httpItem['status'];
@@ -118,12 +129,6 @@ export const getHttpStatusItem = (
                     url = location;
                 } else {
                     forwarding = false;
-                    // const status = parseInt(httpItem['status'], 10);
-                    // if(status >= 200 && status < 400){
-                    //     LOG(OK, `🌎 [HTTP-CHECK]: ${status} for ${initialUrl}`);
-                    // } else {
-                    //     LOG(ERROR, `🌎 [HTTP-CHECK]: ${status} for ${initialUrl}`);
-                    // }
                     httpItem['initialUrl'] = initialUrl; // TODO: testing
                     httpItem['lastLocation'] = url; // TODO: testing
                     httpItem['redirects'] = `${redirects}`;
@@ -132,11 +137,10 @@ export const getHttpStatusItem = (
             }
         }
     } else {
-        const httpItem = getHTTPStatus(url, timeout);
+        httpItem = getHTTPStatus(url, timeout);
         httpItem['lastLocation'] = url;
-        return httpItem;
     }
-    return {} as HTTPStatusBase;
+    return httpItem;
 };
 
 export const getConnectionTime = (url: string): string => {

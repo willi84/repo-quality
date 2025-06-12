@@ -1,6 +1,7 @@
-import { FS, Status, size } from './fs';
+import { FS, Status, getFileName, size } from './fs';
 import * as fs from 'fs';
 import * as mock from 'mock-fs';
+import { LOG } from '../log/log';
 // let PATH = `${BASE}/tmp/foo`;
 
 const checkChanges = (originalFileContent: string | null, file: string) => {
@@ -30,6 +31,17 @@ const getFileContent = (file: string) => {
 const isExisting = (file: string) => {
     return fs.existsSync(file);
 };
+describe('getFileName()', () => {
+    it('should return from path', () => {
+        expect(getFileName('tmp/foo/bar/file.txt')).toEqual('file.txt');
+    });
+    it('should return from path', () => {
+        expect(getFileName('file.txt')).toEqual('file.txt');
+    });
+    it('should return from path', () => {
+        expect(getFileName('')).toEqual('');
+    });
+});
 
 describe('test FS', () => {
     beforeEach(() => {
@@ -221,8 +233,13 @@ describe('test FS', () => {
             expect(content).toEqual(EXPECTED);
         });
         it('should return an empty string for a non-existing file', () => {
+            const spyLog = jest.spyOn(LOG, 'FAIL');
             const content = FS.readFile('tmp/notexists.txt');
             expect(content).toEqual(undefined);
+            expect(spyLog).toHaveBeenCalledWith(
+                expect.stringContaining('FS.readFile()')
+            );
+            spyLog.mockRestore();
         });
     });
     describe('writeFile', () => {
@@ -312,12 +329,10 @@ describe('test FS', () => {
     describe('list', () => {
         beforeEach(() => {
             mock.restore();
-            const PATH = `foo`;
             mock({
                 tmp: {
                     'file.txt': 'xx',
                     'file.json': '{ "xxx": 2}',
-                    'invalidKey.json': `{ xxx: 2, "yyy": "foobar", bla: "blubber", holsten: { "bla": "kosten"}}`,
                 },
                 foo: {
                     'file.txt': 'xx',
@@ -328,38 +343,75 @@ describe('test FS', () => {
                 tmpEmpty: {},
             });
         });
-        it('should return list of files from "tmp"-Folder recursively', () => {
-            const EXPECTED = [
-                'tmp/file.json',
-                'tmp/file.txt',
-                'tmp/invalidKey.json',
-            ];
-            expect(FS.list(`tmp`)).toEqual(EXPECTED);
-            expect(FS.list(`tmp/`)).toEqual(EXPECTED);
+        describe('should return list of files', () => {
+            it('from sub-folder [absolute path, recursive=true]', () => {
+                const EXPECTED = ['tmp/file.json', 'tmp/file.txt'];
+                expect(FS.list(`tmp`)).toEqual(EXPECTED);
+                expect(FS.list(`tmp/`)).toEqual(EXPECTED);
+            });
+            it('from sub-folder with sub-folder [absolute path, recursive=true]', () => {
+                const EXPECTED = ['foo/bar/file.txt', 'foo/file.txt'];
+                expect(FS.list(`foo`)).toEqual(EXPECTED);
+                expect(FS.list(`foo/`)).toEqual(EXPECTED);
+            });
+            it('from sub-folder with sub-folder [relative path, recursive=true]', () => {
+                const EXPECTED = ['file.txt', 'file.txt'];
+                expect(FS.list(`foo`, true, false)).toEqual(EXPECTED);
+                expect(FS.list(`foo/`, true, false)).toEqual(EXPECTED);
+            });
+
+            it('from sub-folder [relative path, recursive=false]', () => {
+                const EXPECTED = ['file.json', 'file.txt'];
+                expect(FS.list(`tmp`, true, false)).toEqual(EXPECTED);
+                expect(FS.list(`tmp/`, true, false)).toEqual(EXPECTED);
+            });
+            it('from root-Folder [absolute path, recursive=true]', () => {
+                const EXPECTED: string[] = [
+                    'foo/bar/file.txt',
+                    'foo/file.txt',
+                    'tmp/file.json',
+                    'tmp/file.txt',
+                ];
+                expect(FS.list(`./`)).toEqual(EXPECTED);
+                expect(FS.list(``)).toEqual(EXPECTED);
+            });
+            it('from "tmp"-Folder recursively', () => {
+                const EXPECTED = ['file.json', 'file.txt'];
+                expect(FS.list(`tmp`, true, false)).toEqual(EXPECTED);
+            });
+            it('should return list of files from foo-Folder not recursively', () => {
+                const EXPECTED = ['foo/file.txt'];
+                expect(FS.list(`./foo`, false)).toEqual(EXPECTED);
+                expect(FS.list(`foo/`, false)).toEqual(EXPECTED);
+            });
         });
-        it('should return list of files from root-Folder recursively', () => {
-            const EXPECTED = [
-                'foo/bar/file.txt',
-                'foo/file.txt',
-                'tmp/file.json',
-                'tmp/file.txt',
-                'tmp/invalidKey.json',
-            ];
-            expect(FS.list(`./`)).toEqual(EXPECTED);
-            expect(FS.list(``)).toEqual(EXPECTED);
+        describe('should return empty list of files', () => {
+            it('from root-Folder [absolute path, recursive=false]', () => {
+                const EXPECTED: string[] = [];
+                expect(FS.list(`./`, false)).toEqual(EXPECTED);
+                expect(FS.list(``, false)).toEqual(EXPECTED);
+            });
+            it('should return empty list of files', () => {
+                expect(FS.list(`tmpEmpty`)).toEqual([]);
+                expect(FS.list(`tmpEmpty/`)).toEqual([]);
+                expect(FS.list(`notexitss`)).toEqual([]);
+                expect(FS.list(`note   xitss`)).toEqual([]);
+            });
         });
-        it('should return list of files from foo-Folder not recursively', () => {
-            const EXPECTED = ['foo/file.txt'];
-            expect(FS.list(`./foo`, false)).toEqual(EXPECTED);
-            expect(FS.list(`foo/`, false)).toEqual(EXPECTED);
+        describe('errors', () => {
+            it('should return empty list when path not exists and get CI info', () => {
+                const logSpy = jest.spyOn(LOG, 'WARN');
+                const EXPECTED: string[] = [];
+                expect(FS.list(`nope`)).toEqual(EXPECTED);
+                const logArg = logSpy.mock.calls[0][0];
+                expect(logArg).toEqual(expect.stringMatching(/@.*fs\.ts:\d+/));
+                expect(logArg).toEqual(expect.stringContaining('FS.list()@'));
+                expect(logArg).toEqual(
+                    expect.stringContaining('Path nope does not exist.')
+                );
+                logSpy.mockRestore();
+            });
         });
-        it('should return empty list of files', () => {
-            expect(FS.list(`tmpEmpty`)).toEqual([]);
-            expect(FS.list(`tmpEmpty/`)).toEqual([]);
-            expect(FS.list(`notexitss`)).toEqual([]);
-            expect(FS.list(`note   xitss`)).toEqual([]);
-        });
-        it('should return error', () => {});
     });
     describe('size', () => {
         it('size of file', () => {

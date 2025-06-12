@@ -1,8 +1,10 @@
 import * as fs from 'fs';
-import { LOG } from './../log/log';
+import { CI, LOG } from './../log/log';
 import * as path from 'path';
 import * as convert from './../convert/convert';
 
+export type Filetype = 'file' | 'folder' | 'symlink' | 'other';
+export type FileItem = { type: Filetype; path: string };
 export enum Status {
     ERROR = -1,
     REMOVED = 0,
@@ -22,21 +24,19 @@ export const size = (value: string | object) => {
     const size = Buffer.from(value).length;
     return size;
 };
+export const getFileName = (filePath: string): string => {
+    const parts = filePath.split('/');
+    const filename = parts[parts.length - 1];
+    return filename.indexOf('.') !== -1 ? filename : '';
+};
 
 // https://stackoverflow.com/a/54387221
 const readFilesRecursively = (
     dir: string,
-    fileList: any[] = [],
+    fileList: FileItem[],
     recursive: boolean
-): any[] => {
-    if (!fs.existsSync(dir)) {
-        LOG.WARN(`Directory ${dir} does not exist.`);
-        return fileList;
-    }
+): FileItem[] => {
     const files = fs.readdirSync(dir);
-    if (recursive === false) {
-        console.log(files);
-    }
     files.forEach((file: string) => {
         const filePath = path.join(dir, file);
         if (fs.statSync(filePath).isDirectory()) {
@@ -89,15 +89,7 @@ export class FS {
         }
         fs.renameSync(oldFolder, newFolder);
     }
-    static readFile(
-        path: string,
-        createIfNotExits = false,
-        options: any = {},
-        customError: string = ``
-    ) {
-        if (!options) {
-            options = {};
-        }
+    static readFile(path: string, options: any = {}) {
         options['encoding'] = 'utf8';
 
         try {
@@ -119,7 +111,7 @@ export class FS {
             }
             return data;
         } catch (error: any) {
-            LOG.FAIL(`readFileSync: ${error}`);
+            LOG.FAIL(`[${CI('FS')}] readFile: ${error}`);
         }
     }
     static writeFile(
@@ -155,15 +147,14 @@ export class FS {
         }
     }
     static list(path: string, recursive = true, fullPath = true) {
-        let pathExits = true;
         if (!fs.existsSync(path)) {
-            LOG.WARN(`Path ${path} does not exist.`);
+            LOG.WARN(`[${CI('FS')}] Path ${path} does not exist.`);
             return [];
         }
         let result: string[] = readFilesRecursively(path, [], recursive)
-            .filter((file: any) => file.type === 'file')
-            .map((file: any) =>
-                fullPath ? file.path : path.split('/').pop() || ''
+            .filter((file: FileItem) => file.type === 'file')
+            .map((file: FileItem) =>
+                fullPath ? file.path : getFileName(file.path)
             );
         return result;
     }

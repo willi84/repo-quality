@@ -1,4 +1,4 @@
-import { COLOR_SETS, LOG, LogOpts, COLOR_SET, LogType } from './log';
+import { COLOR_SETS, LOG, LogOpts, COLOR_SET, LogType, CI } from './log';
 import { colors } from './../colors';
 import * as readline from 'readline';
 const { execSync } = require('child_process');
@@ -64,7 +64,7 @@ describe('log library', () => {
                         opts['newline'] = SCENARIO.hasOwnProperty('newline');
                     }
                     CASE.fn('foobar', opts);
-                    const type = getTypeFromStatus(CASE.id || 'DEFAULT');
+                    const type = getTypeFromStatus(CASE.id);
                     expect(spyLog).toHaveBeenCalledWith(type, 'foobar', opts);
                     const colorSet: COLOR_SET =
                         COLOR_SETS[type as keyof typeof COLOR_SETS];
@@ -106,4 +106,83 @@ describe('log library', () => {
         );
     });
 });
-LOG.OK('test');
+describe('getCallerInfo', () => {
+    const FILE_REGEX = /@.*log\.spec\.ts:\d+/;
+    describe('standard cases', () => {
+        describe('basics', () => {
+            it('should return the correct caller info', () => {
+                const ci = CI();
+                expect(ci).toEqual(expect.stringMatching(FILE_REGEX));
+                expect(ci).toEqual(expect.stringContaining('anonymous()@'));
+            });
+            it('should return the correct caller info with classHint', () => {
+                const ci = CI('FOO');
+                expect(ci).toEqual(expect.stringMatching(FILE_REGEX));
+                expect(ci).toEqual(expect.stringContaining('FOO.anonymous()@'));
+            });
+        });
+        describe('with function context', () => {
+            it('should return the correct caller info from fakeFn()', () => {
+                const logSpy = jest.spyOn(LOG, 'INFO');
+                const fakeFn = () => {
+                    LOG.INFO(`[${CI()}] This is a test log message.`);
+                };
+                fakeFn();
+                const ci = logSpy.mock.calls[0][0];
+                expect(ci).toEqual(expect.stringMatching(FILE_REGEX));
+                expect(ci).toEqual(expect.stringContaining('fakeFn()@'));
+                logSpy.mockRestore();
+            });
+            it('should return the correct caller info from FakeClass fn()', () => {
+                const logSpy = jest.spyOn(LOG, 'INFO');
+                class FAKE {
+                    static fakeFn() {
+                        LOG.INFO(`[${CI('FAKE')}] test log message.`);
+                    }
+                }
+                FAKE.fakeFn();
+                const ci = logSpy.mock.calls[0][0];
+                expect(ci).toEqual(expect.stringMatching(FILE_REGEX));
+                expect(ci).toEqual(expect.stringContaining('FAKE.fakeFn()@'));
+                logSpy.mockRestore();
+            });
+        });
+    });
+    describe('edge cases', () => {
+        it('returns unknown if stack is missing', () => {
+            const Original = Error;
+            global.Error = class extends Original {
+                constructor() {
+                    super();
+                    this.stack = undefined;
+                }
+            } as any;
+            expect(CI()).toBe('(unknown)');
+            global.Error = Original;
+        });
+        it('handles stack without function name', () => {
+            const fakeStack = `Error
+                    // new line needed for test
+                    at /home/user/project/src/utils/file.ts:123:45`;
+            const FAKE_ERROR = { stack: fakeStack, name: 'Error', message: '' };
+            const spy = jest.spyOn(global, 'Error').mockImplementation(
+                // satisfy eslint
+                () => ({ ...FAKE_ERROR }) as unknown as Error
+            );
+            const result = CI();
+            expect(result).toMatch(/anonymous\(\)@.*file\.ts:123/);
+            spy.mockRestore();
+        });
+
+        it('returns unknown if no match at all', () => {
+            const fakeStack = `Error\n    random garbage`;
+            const FAKE_ERROR = { stack: fakeStack, name: 'Error', message: '' };
+            const spy = jest.spyOn(global, 'Error').mockImplementation(
+                // satisfy eslint
+                () => ({ ...FAKE_ERROR }) as unknown as Error
+            );
+            expect(CI()).toBe('(unknown)');
+            spy.mockRestore();
+        });
+    });
+});

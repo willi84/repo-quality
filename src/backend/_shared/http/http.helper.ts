@@ -31,9 +31,12 @@ export const normalizeResponses = (MOCKED_HTTP_STATUS: any) => {
     return MOCKED_RESPONSES;
 };
 export const getMockedResponse = (request: string): string => {
+    // -m 0.4 --silent
+    const regexTimeout = /-m\s+(\d+(\.\d+)?)/;
     const url = request
         .replace('curl -I ', '')
-        .replace(` ${CURL_CONFIG_STATUS}`, '')
+        .replace('--silent', '')
+        .replace(regexTimeout, '')
         .trim();
     const scenarios = Object.keys(MOCKED_RESPONSES);
     let result = HTTP_UNKNOWN;

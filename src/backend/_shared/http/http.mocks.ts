@@ -1,11 +1,11 @@
 import { HTTP_OBJECTS } from '../../index.d';
 
-const DOMAIN_1 = 'domain-1.de';
-const DOMAIN_2 = 'domain-2.de';
-const DOMAIN_3 = 'robert.berlin';
-const DOMAIN_4 = 'aloha.com';
-const DOMAIN_5 = 'lorem.org';
-const DOMAIN_6 = 'blubb.de';
+export const DOMAIN_1 = 'domain-1.de';
+export const DOMAIN_2 = 'domain-2.de';
+export const DOMAIN_3 = 'robert.berlin';
+export const DOMAIN_4 = 'aloha.com';
+export const DOMAIN_5 = 'lorem.org';
+export const DOMAIN_6 = 'blubb.de';
 
 const DATE = 'Fri, 29 Mar 2024 21:28:51 GMT';
 const LAST_MODIFIED = 'Mon, 18 Mar 2024 08:34:52 GMT';
@@ -131,7 +131,7 @@ export const MOCKED_HTTP_STATUS = {
         step1: `curl: (6) Could not resolve host: wifi.inflightinternet.com`,
     },
     HTTP_200: {
-        step1: `
+        step1: `            
             ${STATUS.HTTP_200}
         `,
     },

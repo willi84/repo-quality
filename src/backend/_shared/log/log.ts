@@ -1,4 +1,5 @@
 import { colors } from './../colors';
+import * as path from 'path';
 // TODO: move to other file
 // const isMicrosoft = os.release().toLocaleLowerCase().includes('microsoft');
 // const hasLinuxPlattform = process.platform.includes('linux');
@@ -77,3 +78,35 @@ export class LOG {
     static INLINE = makeLogger(LogType.INLINE);
     static DEBUG = makeLogger(LogType.DEBUG);
 }
+export const getCallerInfo = (
+    classHint?: string,
+    depth: number = 2
+): string => {
+    const stack = new Error().stack;
+    if (!stack) return '(unknown)';
+
+    const lines = stack.split('\n');
+    const callerLine = lines[depth] || '';
+
+    let match = callerLine.match(/at\s+(.*?)\s+\((.+):(\d+):(\d+)\)/);
+    if (!match) {
+        match = callerLine.match(/\s*at\s+(.*):(\d+):(\d+)/);
+        if (!match) return '(unknown)';
+        const [, file, line] = match;
+        const relFile = path.relative(process.cwd(), file);
+        return `anonymous()@${relFile}:${line}`;
+    }
+
+    const [, rawFn, file, line] = match;
+    const relFile = path.relative(process.cwd(), file);
+
+    const fn = rawFn
+        .replace(/^Object\./, '')
+        .replace(/^Function\./, '')
+        .replace(/<anonymous>/, 'anonymous');
+
+    const finalFn = classHint ? `${classHint}.${fn}` : fn;
+
+    return `${finalFn}()@${relFile}:${line}`;
+};
+export const CI = getCallerInfo;
