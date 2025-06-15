@@ -1,6 +1,21 @@
 import { FS } from '../../../_shared/fs/fs';
 import { LOG } from '../../../_shared/log/log';
 
+export const DETECTION_STATES = {
+    ADDED: 'added',
+    // REMOVED: 'removed',
+    UNCHANGED: 'unchanged',
+    NOT_SUPPORTED: 'not-supported',
+    // ERROR: 'error',
+};
+export type DETECTION_STATE = keyof typeof DETECTION_STATES;
+
+export type ICON_DETECTION = {
+    file: string;
+    key: string;
+    icon: string;
+    state: DETECTION_STATE;
+};
 const FILE_TYPES: { [key: string]: string } = {
     ts: 'typescript',
     css: 'css',
@@ -11,11 +26,12 @@ const FILE_TYPES: { [key: string]: string } = {
     njk: 'nunjucks',
 };
 
-export const getComponents = (
+export const analyzeComponents = (
     files: string[],
     icons: string[],
     settings: any
 ) => {
+    const result: ICON_DETECTION[] = [];
     files.forEach((file) => {
         const folderParts = file.split('/');
         const fileName = folderParts[folderParts.length - 1];
@@ -27,15 +43,27 @@ export const getComponents = (
         const icon =
             icons.filter((icon) => icon.endsWith(iconName))[0] || undefined;
         if (!icon) {
-            LOG.WARN(`Unknown file type for ${fileName}, skipping...`);
-            return;
-        }
-        if (!settings[key]) {
-            settings[key] = icon;
-            LOG.OK(`Added to Settings ${key} with icon: "${iconName}"`);
+            result.push({
+                file: file,
+                key: key,
+                icon: iconName,
+                state: DETECTION_STATES.NOT_SUPPORTED as DETECTION_STATE,
+            });
+        } else if (!settings[key]) {
+            result.push({
+                file: file,
+                key: key,
+                icon: iconName,
+                state: DETECTION_STATES.ADDED as DETECTION_STATE,
+            });
         } else {
-            LOG.OK(`Settings already has ${key} with icon: "${iconName}"`);
+            result.push({
+                file: file,
+                key: key,
+                icon: iconName,
+                state: DETECTION_STATES.UNCHANGED as DETECTION_STATE,
+            });
         }
     });
-    return settings;
+    return result;
 };
