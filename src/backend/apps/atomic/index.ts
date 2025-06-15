@@ -2,7 +2,7 @@ import { FS } from '../../_shared/fs/fs';
 import { LOG } from '../../_shared/log/log';
 
 // icons: C:\Users\Robert Willemelis\.vscode\extensions\icons
-const ICON_FOLDER = '../../../../icons';
+
 const FRONTEND = 'src/frontend';
 const COMPONENTS = `${FRONTEND}/components`;
 const PAGES = `${FRONTEND}/pages`;
@@ -15,7 +15,7 @@ const AUTO_END = '/* AUTO-COMPONENT-CSS-END */';
 const getNewFolderSettings = (settings: any, folderPath: string, typePath: string, iconPath: string) => {
     if(folderPath.includes(typePath)){
         const subFolder = folderPath.split('/')[folderPath.split('/').length - 1];
-
+        console.log(settings);
         if(!settings['material-icon-theme.folders.associations'][subFolder]){
             settings['material-icon-theme.folders.associations'][subFolder] = iconPath;
             LOG.OK(`Added ${subFolder} to settings`);

@@ -2,9 +2,8 @@ import * as fs from 'fs';
 import { CI, LOG } from './../log/log';
 import * as path from 'path';
 import * as convert from './../convert/convert';
+import { FileItem } from './fs.d';
 
-export type Filetype = 'file' | 'folder' | 'symlink' | 'other';
-export type FileItem = { type: Filetype; path: string };
 export enum Status {
     ERROR = -1,
     REMOVED = 0,
@@ -146,7 +145,7 @@ export class FS {
             fs.unlinkSync(filePath);
         }
     }
-    static list(path: string, recursive = true, fullPath = true) {
+    static list(path: string, recursive = true, fullPath = true): string[] {
         if (!fs.existsSync(path)) {
             LOG.WARN(`[${CI('FS')}] Path ${path} does not exist.`);
             return [];
