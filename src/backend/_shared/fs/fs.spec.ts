@@ -105,6 +105,11 @@ describe('test FS', () => {
             });
         });
     });
+    describe('getFileName()', () => {
+        it('should return the file name from a path', () => {
+            expect(FS.getFileName('tmp/foo/bar/file.txt')).toEqual('file.txt');
+        });
+    });
     describe('createFolder()', () => {
         const TEST_FOLDER: string = 'testFolder';
         it('creation of existing a folder', () => {

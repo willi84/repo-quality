@@ -56,6 +56,7 @@ export class FS {
     };
     static hasFolder = FS.exists; // alias for consistency
     static hasFile = FS.exists; // alias for consistency
+    static getFileName = getFileName;
     static createFolder(folder: string) {
         if (!fs.existsSync(folder)) {
             fs.mkdirSync(folder, { recursive: true });

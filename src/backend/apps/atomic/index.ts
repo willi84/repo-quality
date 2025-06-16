@@ -43,7 +43,7 @@ if(vscodeSettings){
                 getNewFolderSettings(settings, folder.path, `${TEMPLATES}/`, `${ICON_FOLDER}/folder-template`);
             }
         }
-        FS.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 4));
+        // FS.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 4));
         LOG.OK('Settings updated');
     } catch (e) {
         LOG.FAIL(`${e}`);
