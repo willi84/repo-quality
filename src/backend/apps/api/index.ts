@@ -7,13 +7,35 @@ LOG.OK(' API is running...more!!');
 const REPO_URL = `https://api.github.com/orgs/codeformuenster/repos?per_page=100&page=1`;
 const FILE = './repos.json';
 const TARGET_FILE = './src/_data/repos.json';
-const result = command(`curl ${REPO_URL}`);
+let result = '';
+let doCreate = false;
 
 if (!FS.hasFile(FILE)) {
     LOG.WARN('repos.json does not exist, creating it...');
-    FS.writeFile(FILE, result, 'replace');
+    doCreate = true;
 } else {
-    LOG.INFO('repos.json already exists, skipping creation.');
+    const cnt = FS.readFile(FILE);
+    if(!cnt){
+        doCreate = true;
+        LOG.WARN('repos.json is empty, creating a new one...');
+    } else {
+        try{
+            JSON.parse(cnt);
+        } catch (e) {
+            doCreate = true;
+            LOG.WARN('repos.json is not a valid JSON file, creating a new one...');
+        }
+        if (cnt.length === 0) {
+            doCreate = true;
+        } else {
+            LOG.INFO('repos.json already exists and is not empty, skipping creation.');
+        }
+    }
+    // LOG.INFO('repos.json already exists, skipping creation.');
+}
+if (doCreate) {
+    result = command(`curl ${REPO_URL}`);
+    FS.writeFile(FILE, result, 'replace');
 }
 
 const content: string = FS.readFile(FILE);
