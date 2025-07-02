@@ -76,7 +76,8 @@ const getResponse = (url: string, token: string, isDev: boolean): CurlItem => {
         const status = parseInt(httpItem.status || '0', 10) || 0;
         const success = status >= 200 && status < 400;
         if (isDev) {
-            LOG.INFO(`Response: ${url}: ${status} - ${httpItem.statusMessage}`);
+            const type = success ? 'OK' : 'INFO';
+            LOG[type](`Response: ${url}: ${status} - ${httpItem.statusMessage}`);
         }
         if (isGithubApi) {
             const keysRemain = ['x-ratelimit-remaining', 'xRatelimitRemaining'];
@@ -271,6 +272,7 @@ const createData = (FILE: string, content: string, isDEV: boolean) => {
 
         // LOG.OK(`${KEY}`);
     }
+    finalData.data = projects;
     return finalData;
     // console.log(result);
 
