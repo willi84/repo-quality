@@ -1,18 +1,18 @@
 {
-  "name": "coconat.space",
+  "name": "repo-quality",
   "version": "1.0.0",
-  "description": "tech tools for coconat",
+  "description": "tech tools quality of repos",
   "author": "Robert Willemelis (robert.dev@gmx.de)",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/willi84/coconat.space"
+    "url": "git://github.com/willi84/repo-quality"
   },
   "apps": {
     "check_urls": "backend/apps/check_urls"
   },
   "bugs": {
-    "url": "https://github.com/willi84/coconat.space"
+    "url": "https://github.com/willi84/repo-quality"
   },
   "main": "index.js",
   "devDependencies": {
@@ -63,7 +63,7 @@
     "build": "NODE_ENV=production npm run build_all",
     "dev:md": "chokidar 'items/*.md' -c 'npm run build:api'",
     "watch:atomic": "chokidar 'src/frontend' -c 'npm run build_app -- atomic'",
-    "watch:api": "chokidar 'items' -c 'npm run build_app -- api'",
+    "watch:api": "chokidar 'src/backend' -c 'npm run build_app -- api'",
     "build:prod": "NODE_ENV=production npm run build",
     "build:eleventy": "eleventy",
     "build:debug_eleventy": "DEBUG=Eleventy* eleventy",

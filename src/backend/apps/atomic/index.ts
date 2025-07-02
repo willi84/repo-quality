@@ -31,7 +31,7 @@ if(vscodeSettings){
         const settings = JSON.parse(vscodeSettings);
 
         // file list of src/frontend
-        const folderList = FS.readFilesRecursively(FRONTEND).filter((folder: any) => folder.type === 'folder');
+        const folderList = FS.list(FRONTEND).filter((folder: any) => folder.type === 'folder');
         for(const folder of folderList){
             if(folder.path.indexOf(`${COMPONENTS}/`) !== -1){
                 getNewFolderSettings(settings, folder.path, `${COMPONENTS}/atoms/`, `${ICON_FOLDER}/folder-atom`);

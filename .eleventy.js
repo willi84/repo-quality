@@ -6,6 +6,8 @@ const { routeFilter } = require('./src/setup/filters/route.filter.js');
 const { prettyDateFilter } = require("./src/setup/filters/prettyDate.filter.js");
 const { mergeFilter } = require("./src/setup/filters/merge.filter.js");
 const { dateTimeFilter } = require("./src/setup/filters/dateTime.filter.js");
+const { isLinkFilter } = require("./src/setup/filters/isLink.filter.js");
+const { containsFilter } = require("./src/setup/filters/contains.filter.js");
 const { viteScriptTag, viteLegacyScriptTag, viteLinkStylesheetTags } = require("./src/setup/shortcodes/vite.shortcode.js");
 
 const TEMPLATE_ENGINE = config.TEMPLATE_ENGINE;
@@ -39,6 +41,8 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addNunjucksFilter("merge", mergeFilter);
   eleventyConfig.addNunjucksFilter("svg", svgFilter);
   eleventyConfig.addNunjucksFilter("dateTime", dateTimeFilter);
+  eleventyConfig.addNunjucksFilter("is_link", isLinkFilter);
+  eleventyConfig.addNunjucksFilter("contains", containsFilter);
 
   // Read Vite's manifest.json, and add script tags for the entry files
   // You could decide to do more things here, such as adding preload/prefetch tags

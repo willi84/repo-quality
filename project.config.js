@@ -20,11 +20,11 @@ const TEMPLATE_ENGINE = 'njk';
 const HOSTNAME_DEV = 'localhost';
 const PORT_VITE = 3000;
 const HOST_VITE = `http://${HOSTNAME_DEV}:${PORT_VITE}`;
-const PROJECT_SLUG = "coconat-space";
+const PROJECT_SLUG = "repo-quality";
 const LOGO = 'logo.svg';
 const MENU_ICON = 'burger.svg';
-const PROJECT_NAME = 'coconat.space';
-const CONFIG_ID = 'coconatspace';
+const PROJECT_NAME = 'repo-quality';
+const CONFIG_ID = 'repoquality';
 const STATIC_ASSETS = [
     { src: 'api', dist: 'api' },
     { src: './src/frontend/assets/', dist: 'assets' }

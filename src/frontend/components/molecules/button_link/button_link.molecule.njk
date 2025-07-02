@@ -3,14 +3,18 @@
 {% set class_modifier = params.class_modifier if params.class_modifier else "" %}
 {% set text = params.text if params.text else "" %}
 {% set post_html = (params.image_url | url | svg(dimension, class_svg, attributes) | safe) if params.image_url is defined else "" %}
+{% set type = params.type if params.type is defined else "button" %}
+{% set text = params.text if params.text is defined else "" %}
+{% set class_css = params.class if params.class is defined else "" %}
 
+{# set url
 
 {# set button type #}
 {% set class_modifier = "" %}
-{% if params.type == "link" %}
+{% if type == "link" %}
     {% set class_modifier = "btn--ghost" %}
 {% endif %}
-{% if params.type == "cta" %}
+{% if type == "cta" %}
     {% set class_modifier = "btn--cta" %}
 {% endif %}
 
@@ -25,10 +29,10 @@
   {% set attributes = attributes | merge({"ariaHidden": params.aria_hidden}) %}
 {% endif %}
 
-{% if params.type == "button" %}
+{% if type == "button" %}
     {{ 
         component("button", {
-          class: params.class,
+          class: class_css,
           class_modifier: class_modifier,
           url: params.url,
           disabled: params.disabled,

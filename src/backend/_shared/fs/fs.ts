@@ -99,8 +99,10 @@ export class FS {
             const fileStream = fs.readFileSync(path);
 
             let str = fileStream.toString();
+            console.log(isJSON)
             if (isJSON) {
-                const json = convert.stringToJSON(str);
+                const json = JSON.parse(str); // convert.stringToJSON(str);
+                // const json = convert.stringToJSON(str);
                 if (json.isValid) {
                     data = json.data;
                 } else {

@@ -3,7 +3,7 @@ button {
     font-size: 16px;
     border: none;
     background-color: var(--color-primary);
-    color: var(--color-primary);
+    color: var(--color-white);
     border-radius: 5px;
     cursor: pointer;
 }
