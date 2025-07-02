@@ -65,7 +65,9 @@ export class LOG {
         const color = getColorSet(type);
         const icon = opts?.icon || '';
         const isInline = type === LogType.INLINE || type === LogType.DEFAULT;
-        const txt = isInline ? '' : `[${color.id}]`;
+        const needSpaces = type.length < 4;
+        const spaces = needSpaces ? ' '.repeat((4 - type.length) / 2) : '';
+        const txt = isInline ? '' : `[${spaces}${color.id}${spaces}]`;
         const status = LOG.colorize(txt, color.bg, color.fg);
         const isNewline = type !== LogType.INLINE;
         LOG.output(`${status}${icon}${msg}${isNewline ? '\n' : ''}`);
