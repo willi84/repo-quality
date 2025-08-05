@@ -61,7 +61,7 @@
     "build:api": "npm run build_app -- api",
     "build:opencode": "npm run build_app -- opencode",
     "start_app:check_urls": "npm run start_app -- check_urls",
-    "build_all": "npm run build:api && npm run build:vite && npm run build:eleventy",
+    "build_all": "npm run build:api && npm run build:opencode && npm run build:vite && npm run build:eleventy",
     "build": "NODE_ENV=production npm run build_all",
     "dev:md": "chokidar 'items/*.md' -c 'npm run build:api'",
     "watch:atomic": "chokidar 'src/frontend' -c 'npm run build_app -- atomic'",
