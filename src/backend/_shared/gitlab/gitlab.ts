@@ -18,7 +18,17 @@ export const getAllProjects = (
     const result: CurlItem = getResponse(`${TARGET}`, token, false);
     // console.log(result)
     const maxAvailablePages = parseInt(result?.header['xTotalPages'], 10);
+    if (isNaN(maxAvailablePages)) {
+        LOG.WARN(`No xTotalPages header found in response from ${TARGET}`);
+        console.log(result?.header);
+        return [];
+    }
     const maxPages = maxPage === -1 ? maxAvailablePages : maxPage;
+    if (maxPages < 1) {
+        LOG.WARN(`Invalid maxPage value: ${maxPage}`);
+        console.log(`maxPage: ${maxPage}, maxAvailablePages: ${maxAvailablePages}`);
+        return [];
+    }
     LOG.DEBUG(`Max pages: ${maxPages}`);
     if (result?.content === '') {
         return [];
