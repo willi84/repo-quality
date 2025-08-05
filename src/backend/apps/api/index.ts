@@ -26,8 +26,9 @@ const remainingTokenWarning = (all: number, remaining: number) => {
 };
 
 LOG.OK(`📊 run repo check (isDev: ${isDEV} | hasToken: ${hasToken})`);
-console.log(isDEV)
-const REPO_URL = `https://api.github.com/orgs/codeformuenster/repos?per_page=100&page=1`;
+const perPage = isDEV ? 10 : 100;
+const REPO_URL = `https://api.github.com/orgs/codeformuenster/repos?per_page=${perPage}&page=1`;
+// const REPO_URL = `https://api.github.com/orgs/codeformuenster/repos?per_page=100&page=1`;
 const RAW_URL = `https://raw.githubusercontent.com/willi84/coconat.space/refs/heads/main/tsconfig.json`;
 const FILE = './repos.json';
 const TARGET_FILE = './src/_data/repos.json';
@@ -77,7 +78,7 @@ const getResponse = (url: string, token: string, isDev: boolean): CurlItem => {
         const success = status >= 200 && status < 400;
         if (isDev) {
             const type = success ? 'OK' : 'INFO';
-            LOG[type](`Response: ${url}: ${status} - ${httpItem.statusMessage}`);
+            // LOG[type](`Response: ${url}: ${status} - ${httpItem.statusMessage}`);
         }
         if (isGithubApi) {
             const keysRemain = ['x-ratelimit-remaining', 'xRatelimitRemaining'];
@@ -191,7 +192,12 @@ const createData = (FILE: string, content: string, isDEV: boolean) => {
         process.exit(1);
     }
 
+    let i = 0;
     for (const repo of json) {
+        if(isDEV && i >= 10) {
+            LOG.INFO('Skipping further repos in dev mode.');
+            break;
+        }
         const KEY: string = `${repo.full_name || 'none'}`;
         if (projects[KEY] || KEY === 'none') {
             LOG.WARN(`Repo ${KEY} already exists, skipping...`);
@@ -263,12 +269,13 @@ const createData = (FILE: string, content: string, isDEV: boolean) => {
         if (readme.success) {
             const h1 = readme.content.match(/#\s+(.*)/g);
             if (h1 && h1.length > 0) {
-                projects[KEY].headlines = h1.map((h) => h.replace(/#\s+/, '').trim());
+                projects[KEY].headlines = h1.map((h) => h?.replace(/#\s+/, '').trim());
             } else {
                 LOG.WARN(`No headline found in README for ${repo.full_name}`);
             }
             // console.log(h1);
         }
+        i++;
 
         // LOG.OK(`${KEY}`);
     }

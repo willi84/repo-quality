@@ -5,6 +5,7 @@
  * @version 1.0.0
  */
 
+import { CurlItem } from '../../apps/api';
 import { HTTPStatusBase } from '../../index.d';
 import { command } from '../cmd/cmd';
 import { LOG } from '../log/log';
@@ -148,4 +149,67 @@ export const getConnectionTime = (url: string): string => {
     const cmd = `curl -o /dev/null -s -w '%{time_total}\\n' ${url}`;
     const status = command(`${cmd}`);
     return status;
+};
+
+export const getResponse = (
+    url: string,
+    token: string,
+    isDev: boolean
+): CurlItem => {
+    // const isGithub = url.indexOf('github.com') !== -1;
+    const isGithubApi = url.indexOf('api.github.com') !== -1;
+    const isGitlabApi = url.indexOf('gitlab') !== -1;
+
+    // `curl -H "Authorization: token ${token}" -H "User-Agent: nodejs" ${url}`
+    if (isGithubApi && !token) {
+        LOG.FAIL('Please set a GITHUB_TOKEN in the environment variables.');
+        return {
+            header: {},
+            content: '',
+            status: '0',
+            success: false,
+        };
+    } else {
+        // curl --header "PRIVATE-TOKEN: <your_personal_access_token>" "https://gitlab.com/api/v4/projects/123456/repository/files/README.md/raw?ref=main"
+
+        const auth = isGithubApi
+            ? `-H "Authorization: token ${token}" `
+            : isGitlabApi
+                ? `-H "PRIVATE-TOKEN: ${token}" `
+                : '';
+        const ua = isGithubApi ? '' : '-H "User-Agent: nodejs" ';
+        const finalCommand = `curl -s ${auth} ${ua} -i ${url} `;
+        // console.log(finalCommand)
+        const data = command(finalCommand);
+        const splitted = data.split(/\r?\n\r?\n/);
+        const header = splitted[0];
+        const httpItem = getHttpItem(header);
+        // all splitted except 0
+        const content = splitted.slice(1).join('\n');
+        // const content = splitted[1];
+        const status = parseInt(httpItem.status || '0', 10) || 0;
+        const success = status >= 200 && status < 400;
+        if (isDev) {
+            const type = success ? 'OK' : 'INFO';
+            LOG[type](`Response: ${url}: ${status} - ${httpItem.statusMessage}`);
+        }
+        // if (isGithubApi) {
+        //     const keysRemain = ['x-ratelimit-remaining', 'xRatelimitRemaining'];
+        //     const keysLimit = ['x-ratelimit-limit', 'xRatelimitLimit'];
+        //     const remaining = parseInt(getHttpProp(httpItem, keysRemain), 10);
+        //     const limit = parseInt(getHttpProp(httpItem, keysLimit), 10);
+        //     if (remaining && limit) {
+        //         remainingTokenWarning(limit, remaining);
+        //     } else {
+        //         LOG.WARN('No rate limit information found in response headers');
+        //     }
+        // }
+
+        return {
+            header: httpItem,
+            content: content,
+            status: status.toString(),
+            success: success,
+        };
+    }
 };

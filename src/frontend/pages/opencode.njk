@@ -1,0 +1,55 @@
+---
+layout: base.template.njk
+title: Welcome to opencode
+navigation: true
+footer: true
+---
+ {%- from "./../templates/_setup/macros/component.macro.njk" import component -%}
+
+ {% set hideProperties = ['private', 'full_name']%}
+ {% set repos = opencode %}
+
+
+ <div data-search="repos">
+    {% set count = repos.properties.id.count%}
+    {% for property, item in repos.properties %}
+        {% set isHiddenKey = hideProperties | contains(property) %}
+            <button type="button" class="btn btn-primary btn-sm" data-active="{{ not isHiddenKey }}"  data-filter-type="property" data-filter-value="{{ property }}">
+     {# <span class="badge bg-secondary">{{item.count}}</span> #}
+     {{property}}
+     {# <span class="badge bg-secondary">{{item.count}}</span> #}
+   </button>
+    {% endfor %}
+<input type="text" class="form-control mb-3" placeholder="Search {{count}} repositories..." aria-label="Search repositories..." />
+    <table class="table">
+        {% for key, repo in repos.data %}
+        {% set index = loop.index%}
+            <tr data-repo="{{ key }}" data-active="true" data-searchable>
+                {# index #}
+                <td data-property="index" data-hidden="{{isHiddenProperty}}">
+                    {# <a href="/opencode/{{ key }}" class="text-decoration-none"> #}
+                        #{{ index }}
+                    {# </a> #}
+                </td>
+                {% for property, value in repo %}
+                {% set isHiddenProperty = hideProperties | contains(property) %}
+
+                {# {% if not hideProperties | contains(property) %} #}
+                <td data-property="{{ property }}" data-hidden="{{isHiddenProperty}}">
+                        {% if property | contains('avatar') %}
+                            {% if value != "" %}
+                                <img width="20" height="20" src="{{ value | safe }}" />
+                            {% endif %}
+                            {% elif property == 'webUrl' %}
+                            <a href="{{ value | safe }}" class="text-decoration-none" target="_blank">{{property}}</a>
+
+                        {% else %}
+                            {{ value }}
+                        {% endif %}
+                    </td>
+    {# {% endif %} #}
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+</div>
