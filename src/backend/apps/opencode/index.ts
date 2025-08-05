@@ -1,14 +1,15 @@
 import { FS } from '../../_shared/fs/fs';
 import { getAllProjects } from '../../_shared/gitlab/gitlab';
 import { LOG } from '../../_shared/log/log';
-import { PROJECTS, RESULT } from '../api.d';
+import { PROJECTS, RESULT } from '../api/index.d';
+// import { PROJECTS, RESULT } from './../index.d';
 
 const GITLAB_TOKEN = process.env.OC_REPO_QUALITY || '';
 
 export const getData = (max: number, perPage: number = 100) => {
-    const MAX = max === -1 ? 1000 : max;
+    // const MAX = max === -1 ? 1000 : max;
     const endpoint = 'https://gitlab.opencode.de/api/v4';
-    const repos = getAllProjects(endpoint, GITLAB_TOKEN, MAX, perPage);
+    const repos = getAllProjects(endpoint, GITLAB_TOKEN, max, perPage);
     if (repos.length === 0) {
         LOG.FAIL('No projects found.');
         return [];

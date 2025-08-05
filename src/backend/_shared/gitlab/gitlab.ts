@@ -6,7 +6,7 @@ import { LOG } from '../log/log';
 export const getAllProjects = (
     endpoint: string,
     token: string,
-    maxPage: number = 1,
+    maxPage: number = -1,
     perPage: number = 100
 ) => {
     let nextPage = 1;
