@@ -29,7 +29,7 @@ export const getAllProjects = (
     nextPage = parseInt(result?.header['xNextPage'], 10) || 0;
     if (nextPage > 0) {
         LOG.DEBUG(`Next page: ${nextPage}`);
-        for (let i = nextPage; i <= maxPage && i <= maxPages; i++) {
+        for (let i = nextPage; i <= maxPages && i <= maxPages; i++) {
             // pageI = i;
             nextPage = i;
             if (nextPage > maxPages || nextPage === 0) {
