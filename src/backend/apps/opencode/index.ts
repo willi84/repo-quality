@@ -24,66 +24,70 @@ export const getData = (max: number, perPage: number = 100) => {
     let i = 0;
     for (const project of repos) {
         const id = project.id.toString();
-        projects[id] = {
-            id: project.id,
-            name: project.name,
-            // webUrl: project.webUrl,
-            // description: project.description || 'No description',
-            // createdAt: project.createdAt,
-            // lastActivityAt: project.lastActivityAt,
-        };
+        if(!projects[id]){
 
-        if (project.name !== undefined) {
-            const name = project.name || '';
-            projects[id].name = name.replace(/"/g, '\\"');
-        }
-        if (project.path_with_namespace !== undefined) {
-            const namespace = project.path_with_namespace || '';
-            projects[id].pathWithNamespace = namespace.replace(/"/g, '\\"');
-        }
-        if (project.web_url !== undefined) {
-            const webUrl = project.web_url || '';
-            projects[id].webUrl = webUrl.replace(/"/g, '\\"');
-        }
-        if (project.description !== undefined) {
-            const description = project.description || '';
-            projects[id].description = description.replace(/"/g, '\\"');
-        }
-        if (project.created_at !== undefined) {
-            const createdAt = project.created_at || '';
-            projects[id].createdAt = createdAt;
-        }
-        if (project.last_activity_at !== undefined) {
-            const lastActivityAt = project.last_activity_at || '';
-            projects[id].lastActivityAt = lastActivityAt;
-        }
-        if (project.avatar_url !== undefined) {
-            const avatar_url = project.avatar_url || '';
-            projects[id].avatarUrl = avatar_url.replace(/"/g, '\\"');
-        }
-        if (project.open_issues_count !== undefined) {
-            const openIssuesCount = project.open_issues_count || 0;
-            projects[id].openIssuesCount = openIssuesCount;
-        }
-        if (project.star_count !== undefined) {
-            const starCount = project.star_count || 0;
-            projects[id].starCount = starCount;
-        }
-        if (project.forks_count !== undefined) {
-            const forksCount = project.forks_count || 0;
-            projects[id].forksCount = forksCount;
-        }
-        if (project.visibility !== undefined) {
-            const visibility = project.visibility || 'unknown';
-            projects[id].visibility = visibility;
-        }
-        const props = Object.keys(projects[id]);
-        for (const prop of props) {
-            if (!finalData.properties[prop]) {
-                finalData.properties[prop] = { count: 1 };
-            } else {
-                finalData.properties[prop].count++;
+            projects[id] = {
+                id: project.id,
+                name: project.name,
+                // webUrl: project.webUrl,
+                // description: project.description || 'No description',
+                // createdAt: project.createdAt,
+                // lastActivityAt: project.lastActivityAt,
+            };
+            if (project.name !== undefined) {
+                const name = project.name || '';
+                projects[id].name = name.replace(/"/g, '\\"');
             }
+            if (project.path_with_namespace !== undefined) {
+                const namespace = project.path_with_namespace || '';
+                projects[id].pathWithNamespace = namespace.replace(/"/g, '\\"');
+            }
+            if (project.web_url !== undefined) {
+                const webUrl = project.web_url || '';
+                projects[id].webUrl = webUrl.replace(/"/g, '\\"');
+            }
+            if (project.description !== undefined) {
+                const description = project.description || '';
+                projects[id].description = description.replace(/"/g, '\\"');
+            }
+            if (project.created_at !== undefined) {
+                const createdAt = project.created_at || '';
+                projects[id].createdAt = createdAt;
+            }
+            if (project.last_activity_at !== undefined) {
+                const lastActivityAt = project.last_activity_at || '';
+                projects[id].lastActivityAt = lastActivityAt;
+            }
+            if (project.avatar_url !== undefined) {
+                const avatar_url = project.avatar_url || '';
+                projects[id].avatarUrl = avatar_url.replace(/"/g, '\\"');
+            }
+            if (project.open_issues_count !== undefined) {
+                const openIssuesCount = project.open_issues_count || 0;
+                projects[id].openIssuesCount = openIssuesCount;
+            }
+            if (project.star_count !== undefined) {
+                const starCount = project.star_count || 0;
+                projects[id].starCount = starCount;
+            }
+            if (project.forks_count !== undefined) {
+                const forksCount = project.forks_count || 0;
+                projects[id].forksCount = forksCount;
+            }
+            if (project.visibility !== undefined) {
+                const visibility = project.visibility || 'unknown';
+                projects[id].visibility = visibility;
+            }
+            const props = Object.keys(projects[id]);
+            for (const prop of props) {
+                if (!finalData.properties[prop]) {
+                    finalData.properties[prop] = { count: 1 };
+                } else {
+                    finalData.properties[prop].count++;
+                }
+            }
+        } else {
+            LOG.FAIL(`Project with ID ${id} already exists. Skipping duplicate.`);
         }
         // if (i === 0) {
         //     console.log(project);
@@ -91,7 +95,7 @@ export const getData = (max: number, perPage: number = 100) => {
         // }
         i++;
     }
-    finalData.data = {...finalData.data, ...projects };
+    finalData.data = { ...projects };
     // finalData.properties = repos[0] ? Object.keys(repos[0]) : [];
 
     // return projects.map((project: any) => {
