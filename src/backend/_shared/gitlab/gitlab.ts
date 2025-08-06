@@ -48,6 +48,7 @@ export const getAllProjects = (
             }
             const nextCmd = `projects?per_page=${perPage}&page=${nextPage}`;
             const nextTarget = `${endpoint}/${nextCmd}`;
+            console.log(`Fetching next page: ${nextTarget}`);
             const nextResult = getResponse(`${nextTarget}`, token, false);
             if (nextResult && nextResult.content) {
                 const nextProjects = JSON.parse(nextResult.content || '[]');

@@ -11,6 +11,7 @@ export const getData = (max: number, perPage: number = 100) => {
     // const MAX = max === -1 ? 1000 : max;
     const endpoint = 'https://gitlab.opencode.de/api/v4';
     const repos = getAllProjects(endpoint, GITLAB_TOKEN, max, perPage);
+    console.log(`Found ${repos.length} projects in GitLab.`);
     if (repos.length === 0) {
         LOG.FAIL('No projects found.');
         return [];
