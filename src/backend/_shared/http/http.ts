@@ -5,7 +5,7 @@
  * @version 1.0.0
  */
 
-import { CurlItem } from '../../apps/api';
+import { CurlItem } from '../../apps/api.d';
 import { HTTPStatusBase } from '../../index.d';
 import { command } from '../cmd/cmd';
 import { LOG } from '../log/log';
@@ -178,7 +178,7 @@ export const getResponse = (
                 ? `-H "PRIVATE-TOKEN: ${token}" `
                 : '';
         const ua = isGithubApi ? '' : '-H "User-Agent: nodejs" ';
-        const finalCommand = `curl -s ${auth} ${ua} -i ${url} `;
+        const finalCommand = `curl -s ${auth} ${ua} -i "${encodeURI(url)}" `;
         // console.log(finalCommand)
         const data = command(finalCommand);
         const splitted = data.split(/\r?\n\r?\n/);

@@ -15,6 +15,7 @@ export const getAllProjects = (
     const cmd = `projects?per_page=${perPage}&page=${nextPage}`;
     const TARGET = `${endpoint}/${cmd}`;
 
+    // console.log(`fetching: ${TARGET}`)
     const result: CurlItem = getResponse(`${TARGET}`, token, false);
     // console.log(result)
     const maxAvailablePages = parseInt(result?.header['xTotalPages'], 10);
@@ -34,6 +35,7 @@ export const getAllProjects = (
         return [];
     }
     const projects = JSON.parse(result?.content || '[]');
+    console.log(projects[0].id)
     LOG.OK(`[${nextPage}/${maxPages}] received ${projects.length} items from ${TARGET}`);
     for(const project of projects){
         finalResult.push(project)
@@ -51,10 +53,13 @@ export const getAllProjects = (
             }
             const nextCmd = `projects?per_page=${perPage}&page=${nextPage}`;
             const nextTarget = `${endpoint}/${nextCmd}`;
-            console.log(`Fetching next page: ${nextTarget}`);
+            // console.log(`Fetching next page: ${nextTarget}`);
             const nextResult = getResponse(`${nextTarget}`, token, false);
             if (nextResult && nextResult.content) {
                 const nextProjects = JSON.parse(nextResult.content || '[]');
+                // const ids = nextProjects.content.map(item => item.id);
+                console.log(nextProjects[0].id);
+                // console.log(nextProjects.map(item => item.id))
                 LOG.OK(
                     `[${nextPage}/${maxPages}] received ${nextProjects.length} items from ${nextTarget}`
                 );
