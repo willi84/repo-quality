@@ -91,7 +91,7 @@ export const getData = (max: number, perPage: number = 100) => {
         // }
         i++;
     }
-    finalData.data = { ...projects };
+    finalData.data = {...finalData.data, ...projects };
     // finalData.properties = repos[0] ? Object.keys(repos[0]) : [];
 
     // return projects.map((project: any) => {
