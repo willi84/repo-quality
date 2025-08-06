@@ -35,7 +35,10 @@ export const getAllProjects = (
     }
     const projects = JSON.parse(result?.content || '[]');
     LOG.OK(`[${nextPage}/${maxPages}] received ${projects.length} items from ${TARGET}`);
-    finalResult.push(...projects);
+    for(const project of projects){
+        finalResult.push(project)
+    }
+    // finalResult.push(...projects);
     nextPage = parseInt(result?.header['xNextPage'], 10) || 0;
     if (nextPage > 0) {
         LOG.DEBUG(`Next page: ${nextPage}`);
@@ -55,7 +58,10 @@ export const getAllProjects = (
                 LOG.OK(
                     `[${nextPage}/${maxPages}] received ${nextProjects.length} items from ${nextTarget}`
                 );
-                finalResult.push(...nextProjects);
+                for(const nextProject of nextProjects){
+                    finalResult.push(nextProject)
+                }
+                // finalResult.push(...nextProjects);
             } else {
                 LOG.WARN(`No more items found for ${nextTarget} on page ${nextPage}`);
                 break;
