@@ -5,6 +5,7 @@ import { PROJECTS, RESULT } from '../api/index.d';
 // import { PROJECTS, RESULT } from './../index.d';
 
 const GITLAB_TOKEN = process.env.OC_REPO_QUALITY || '';
+const FILE = 'src/_data/opencode.json';
 
 export const getData = (max: number, perPage: number = 100) => {
     // const MAX = max === -1 ? 1000 : max;
@@ -108,11 +109,13 @@ export const getData = (max: number, perPage: number = 100) => {
 const IS_DEV = process.env.NODE_ENV !== 'production';
 LOG.OK(`Running in ${IS_DEV ? 'development' : 'production'} mode.`);
 const MAX_PAGES = IS_DEV ? 3 : -1; // Limit to 10
-const getNew = IS_DEV ? !FS.exists('src/_data/opencode.json') : true;
+const getNew = IS_DEV ? !FS.exists(FILE) : true;
 if (getNew) {
     LOG.OK('Fetching new data from GitLab...');
+    FS.removeFile(FILE);
     const finalData = getData(MAX_PAGES, 50);
-    FS.writeFile('src/_data/opencode.json', JSON.stringify(finalData, null, 2));
+
+    FS.writeFile(FILE, JSON.stringify(finalData, null, 2));
 } else {
     LOG.INFO('Using existing data from src/_data/opencode.json');
 }
