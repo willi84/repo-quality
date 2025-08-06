@@ -114,6 +114,7 @@ if (getNew) {
     LOG.OK('Fetching new data from GitLab...');
     FS.removeFile(FILE);
     const finalData = getData(MAX_PAGES, 50);
+    LOG.DEBUG(`Final data: ${Object.keys(finalData.data).length} projects found.`);
 
     FS.writeFile(FILE, JSON.stringify(finalData, null, 2));
 } else {
