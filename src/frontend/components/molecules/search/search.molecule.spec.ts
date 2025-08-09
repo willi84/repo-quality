@@ -1,4 +1,4 @@
-import { getHighlightedText } from "./search.molecule";
+import { getHighlightedText } from './search.molecule';
 
 describe('results', () => {
 

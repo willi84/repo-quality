@@ -20,7 +20,7 @@
     border-radius: 15px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
-.search__no-result{
+.search__result{
     color: green;
 }
 .search__info--hidden{
@@ -31,4 +31,16 @@
 }
 [data-active="false"] {
     opacity: 0.7;
+}
+
+.skill-search,
+.skill-search.hidden + .skill-value {
+    display: inline-block;
+    /* display: auto; */
+}
+.skill-search + .skill-value {
+    display: none;
+}
+.is-visible{
+    background-color: rgb(214, 1, 132);
 }

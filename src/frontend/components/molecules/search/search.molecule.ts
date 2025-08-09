@@ -1,10 +1,13 @@
+import { time } from 'console';
+
+
+// TODO: Perforamcen auf 1500
 export const createSearch = (target: string, uid: string, source: string) => {
     const searchArea = document.querySelector(`[${target}="${uid}"]`);
     if (searchArea) {
         const filters = searchArea.querySelectorAll('[data-filter-type]');
         for (const filter of filters) {
             filter.addEventListener('click', (e) => {
-                console.log('click')
                 const target = e.target as HTMLElement;
                 const isActive = target.getAttribute('data-active');
                 if (isActive === 'true') {
@@ -33,77 +36,65 @@ export const createSearch = (target: string, uid: string, source: string) => {
         const input: HTMLInputElement | null =
             searchArea?.querySelector('input');
         input?.addEventListener('keyup', (e) => {
-            const skills = document.querySelectorAll(source);
+            //write to local storage
             const target = e.target as HTMLInputElement;
+            localStorage.setItem('search', target?.value || '');
+            const start = new Date().getTime();
+            const skills = document.querySelectorAll(source);
             const searchValue = target.value.toLowerCase()
 
-            if (target.value === '') {
-                // reset search
+            const area = searchArea.querySelector('.search__result');
+            const nonHiddenSkills = document.querySelectorAll(`${source}:not(.hidden)`);
+            const noResultItem = area?.querySelector('.search__no-result');
+            const hasResultItem = area?.querySelector('.search__has-result');
+            const defaultItem = area?.querySelector('.search__default');
+            const searchItem = area?.querySelector('.search__value') as HTMLElement;
+            const searchNumResults = area?.querySelector('.search__num-results') as HTMLElement;
+            if (target.value === '') { // reset search
+                // info area
+                noResultItem?.classList.add('hidden');
+                hasResultItem?.classList.add('hidden');
+                defaultItem?.classList.remove('hidden');
+
+                //hide placeholders
                 for (const skill of skills) {
-                    skill.classList.remove('hidden');
-                    const valueItem = skill.querySelector('.skill-value');
-                    const placeholder = skill.querySelector('.skill-search');
-                    valueItem?.classList.remove('hidden');
-                    placeholder?.classList.add('hidden');
+                    const placeholders = skill.querySelectorAll('.skill-search');
+                    for (const placeholder of placeholders) {
+                        placeholder.classList.add('hidden');
+                    }
                 }
             } else {
-                let i = 0;
                 for (const skill of skills) {
                     const hasValue = (skill as HTMLElement).innerText
                         .toLowerCase()
                         .includes(searchValue);
                     if (hasValue) {
-                        const valueItems = skill.querySelectorAll('.skill-value');
-                        // console.log(`num value items: ${valueItems.length} ==> valueitem: ${valueItems[0].innerText}`);
                         skill.classList.remove('hidden');
-                        for (const valueItem of valueItems) {
-                            const item = valueItem as HTMLElement;
-                            const skillValue: string = item.innerText;
-                            const placeholder =
-                                item?.parentElement?.querySelector(
-                                    '.skill-search'
-                                ); // as HTMLElement;
-                            const itemValue = skillValue?.toLowerCase();
-                            if (itemValue.includes(searchValue)) {
-                                valueItem?.classList.add('hidden');
-                                placeholder?.classList.remove('hidden');
-                                if (placeholder) {
-                                    const html = getHighlightedText(
-                                        skillValue,
-                                        target.value
-                                    );
-                                    placeholder.innerHTML = `${html}`;
-                                }
-                                i += 1;
-                            } else {
-                                valueItem?.classList.remove('hidden');
-                                placeholder?.classList.add('hidden');
-                            }
-                        }
                     } else {
                         skill.classList.add('hidden');
                     }
                 }
-                const noResultItem: HTMLElement | null =
-                    searchArea?.querySelector('.search__no-result');
-                if (noResultItem) {
-                    console.log('noresult');
-                    const searchItem: HTMLElement | null =
-                        noResultItem.querySelector('.search__value');
-                    if (i === 0) {
-                        if (searchItem !== null) {
-                            searchItem.innerText = `${target.value}`;
-                        }
-                        noResultItem?.classList.remove('search__info--hidden');
-                    } else {
-                        noResultItem?.classList.add('search__info--hidden');
+
+                // info area
+                defaultItem?.classList.add('hidden');
+                if (nonHiddenSkills.length === 0) {
+                    noResultItem?.classList.remove('hidden');
+                    hasResultItem?.classList.add('hidden');
+                    if (searchItem) {
+                        searchItem.innerText = `${target.value}`;
+                    }
+                } else {
+                    noResultItem?.classList.add('hidden');
+                    hasResultItem?.classList.remove('hidden');
+                    if (searchNumResults) {
+                        searchNumResults.innerText = `${nonHiddenSkills.length}`;
                     }
                 }
             }
+            console.log(`Search for ${target.value} took: ${new Date().getTime() - start}ms`);
         });
     }
 };
-
 export const getHighlightedText = (text: string, searchTerm: string) => {
     if (searchTerm === '') return text;
     // Split the text by the highlight term
@@ -116,3 +107,43 @@ export const getHighlightedText = (text: string, searchTerm: string) => {
         )
         .join('');
 };
+export const searchRow = (target: HTMLElement) => {
+    const targetValue = localStorage.getItem('search')?.toLowerCase() || '';
+    const valueItems = target.querySelectorAll('.skill-value');
+    for (const valueItem of valueItems) {
+        const item = valueItem as HTMLElement;
+        const skillValue: string = item.innerText;
+        const itemValue = skillValue?.toLowerCase();
+        const placeholder =
+            item?.parentElement?.querySelector(
+                '.skill-search'
+            ); // as HTMLElement;
+        if (itemValue.includes(targetValue)) {
+        //     valueItem?.classList.add('hidden');
+            placeholder?.classList.remove('hidden');
+            if (placeholder) {
+                const html = getHighlightedText(skillValue, targetValue);
+                placeholder.innerHTML = `${html}`;
+            }
+        } else {
+            placeholder?.classList.add('hidden');
+        }
+    }
+};
+
+const rows = document.querySelectorAll('[data-active="true"]');
+
+const io = new IntersectionObserver(
+    (entries) => {
+        for (const entry of entries) {
+            entry.target.classList.toggle('is-visible', entry.isIntersecting);
+            // if isVisibel highlight search
+            if (entry.isIntersecting) {
+                searchRow(entry.target as HTMLElement);
+            }
+        }
+    },
+    { threshold: 0.1 }
+);
+
+rows.forEach((r) => io.observe(r));
