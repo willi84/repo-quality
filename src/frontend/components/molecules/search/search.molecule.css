@@ -3,7 +3,7 @@
     font-weight: bold;
 }
 .search-match{
-    background-color: yellow;
+    background-color: rgb(230, 161, 33);
 }
 .search__area{
     display: flex;

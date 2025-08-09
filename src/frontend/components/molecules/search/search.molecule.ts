@@ -4,6 +4,7 @@ export const createSearch = (target: string, uid: string, source: string) => {
         const filters = searchArea.querySelectorAll('[data-filter-type]');
         for (const filter of filters) {
             filter.addEventListener('click', (e) => {
+                console.log('click')
                 const target = e.target as HTMLElement;
                 const isActive = target.getAttribute('data-active');
                 if (isActive === 'true') {
@@ -34,6 +35,7 @@ export const createSearch = (target: string, uid: string, source: string) => {
         input?.addEventListener('keyup', (e) => {
             const skills = document.querySelectorAll(source);
             const target = e.target as HTMLInputElement;
+            const searchValue = target.value.toLowerCase()
 
             if (target.value === '') {
                 // reset search
@@ -47,36 +49,39 @@ export const createSearch = (target: string, uid: string, source: string) => {
             } else {
                 let i = 0;
                 for (const skill of skills) {
-                    const valueItem = skill.querySelector(
-                        '.skill-value'
-                    ) as HTMLElement;
-                    const placeholder = skill.querySelector(
-                        '.skill-search'
-                    ) as HTMLElement;
-                    const skillValue: string = valueItem?.innerText;
-                    if (
-                        skill.textContent
-                            ?.toLowerCase()
-                            .includes(target.value.toLowerCase())
-                    ) {
+                    const hasValue = (skill as HTMLElement).innerText
+                        .toLowerCase()
+                        .includes(searchValue);
+                    if (hasValue) {
+                        const valueItems = skill.querySelectorAll('.skill-value');
+                        // console.log(`num value items: ${valueItems.length} ==> valueitem: ${valueItems[0].innerText}`);
                         skill.classList.remove('hidden');
-                        valueItem?.classList.add('hidden');
-                        skill
-                            .querySelector('.skill-search')
-                            ?.classList.remove('hidden');
-                        if (placeholder) {
-                            const html = getHighlightedText(
-                                skillValue,
-                                target.value
-                            );
-                            placeholder.innerHTML = `${html}`;
+                        for (const valueItem of valueItems) {
+                            const item = valueItem as HTMLElement;
+                            const skillValue: string = item.innerText;
+                            const placeholder =
+                                item?.parentElement?.querySelector(
+                                    '.skill-search'
+                                ); // as HTMLElement;
+                            const itemValue = skillValue?.toLowerCase();
+                            if (itemValue.includes(searchValue)) {
+                                valueItem?.classList.add('hidden');
+                                placeholder?.classList.remove('hidden');
+                                if (placeholder) {
+                                    const html = getHighlightedText(
+                                        skillValue,
+                                        target.value
+                                    );
+                                    placeholder.innerHTML = `${html}`;
+                                }
+                                i += 1;
+                            } else {
+                                valueItem?.classList.remove('hidden');
+                                placeholder?.classList.add('hidden');
+                            }
                         }
-                        i += 1;
                     } else {
-                        valueItem?.classList.remove('hidden');
-                        placeholder?.classList.add('hidden');
                         skill.classList.add('hidden');
-                        // placeholder.innerHTML = '';
                     }
                 }
                 const noResultItem: HTMLElement | null =

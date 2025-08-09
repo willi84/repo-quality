@@ -24,7 +24,7 @@ footer: true
 {# <button type="button" class="kern-btn kern-btn--primary">
 <span class="kern-label">Primary Button</span>
 </button> #}
-        
+
             <button type="button" class="btxxn btn-prixxmary btn-xs kern-btn kern-btn--primary" data-active="{{ not isHiddenKey }}"  data-filter-type="property" data-filter-value="{{ property }}">
      {# <span class="badge bg-secondary">{{item.count}}</span> #}
      {{property}}
@@ -69,7 +69,8 @@ footer: true
                             <a href="{{ value | safe }}" class="text-decoration-none" target="_blank">{{property}}</a>
 
                         {% else %}
-                            {{ value }}
+                            <span class="skill-value">{{ value }}</span>
+                            <span class="skill-search hidden">{{ value }}</span>
                         {% endif %}
                     </td>
     {# {% endif %} #}

@@ -79,6 +79,7 @@ export const getData = (max: number, perPage: number = 100) => {
                 const visibility = project.visibility || 'unknown';
                 projects[id].visibility = visibility;
             }
+            // if(project.readme_url)
             const props = Object.keys(projects[id]);
             for (const prop of props) {
                 if (!finalData.properties[prop]) {
