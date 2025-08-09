@@ -45,7 +45,9 @@ footer: true
     <table class="tabxxle kern-table kern-table--striped">
         {% for key, repo in repos.data %}
         {% set index = loop.index%}
-            <tr class="kern-table__row" data-repo="{{ key }}" data-active="true" data-searchable>
+            <tr class="kern-table__row" data-repo="{{ key }}" data-active="true" data-searchable="{{repo | allValues }}">
+                {% set isHiddenProperty = hideProperties | contains('index') %}
+                {# <td class="kern-table
                 {# index #}
                 <td class="kern-table__cell"  data-property="index" data-hidden="{{isHiddenProperty}}">
                     {# <a href="/opencode/{{ key }}" class="text-decoration-none"> #}

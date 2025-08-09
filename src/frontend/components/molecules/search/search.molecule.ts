@@ -2,6 +2,8 @@ import { time } from 'console';
 
 
 // TODO: Perforamcen auf 1500
+
+// idee alle values in attribut
 export const createSearch = (target: string, uid: string, source: string) => {
     const searchArea = document.querySelector(`[${target}="${uid}"]`);
     if (searchArea) {
@@ -65,9 +67,8 @@ export const createSearch = (target: string, uid: string, source: string) => {
                 }
             } else {
                 for (const skill of skills) {
-                    const hasValue = (skill as HTMLElement).innerText
-                        .toLowerCase()
-                        .includes(searchValue);
+                    const searchValues = skill.getAttribute('data-searchable');
+                    const hasValue = searchValues?.includes(searchValue);
                     if (hasValue) {
                         skill.classList.remove('hidden');
                     } else {
