@@ -119,7 +119,7 @@ const getNew = IS_DEV ? !FS.exists(FILE) : true;
 if (getNew) {
     LOG.OK('Fetching new data from GitLab...');
     FS.removeFile(FILE);
-    const finalData = getData(MAX_PAGES, 50);
+    const finalData = getData(MAX_PAGES, 20);
     LOG.DEBUG(`Final data: ${Object.keys(finalData.data).length} projects found.`);
 
     FS.writeFile(FILE, JSON.stringify(finalData, null, 2));
