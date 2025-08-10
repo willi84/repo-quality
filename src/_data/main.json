@@ -9,8 +9,14 @@
     },
     "links": [
         {
-            "text": "Dashboard!",
-            "url": "dashboard"
+            "text": "Dashboard",
+            "url": "dashboard",
+            "type": "button"
+        },
+        {
+            "text": "opencode.de",
+            "url": "opencode",
+            "type": "button"
         }
 
     ]

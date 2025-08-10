@@ -23,7 +23,7 @@ footer: true
     {% set disabled = (link.disabled is defined and link.disabled == true) or (link.url is not defined) %}
         {{
             component("button_link", {
-                "type": "button",
+                "type": link.type or "link",
                 "text": link.text,
                 "url": link.url,
                 "disabled": disabled
