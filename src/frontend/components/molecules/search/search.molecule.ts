@@ -59,12 +59,14 @@ export const createSearch = (target: string, uid: string, source: string) => {
                 defaultItem?.classList.remove('hidden');
 
                 //hide placeholders
+                const st = new Date().getTime();
                 for (const skill of skills) {
                     const placeholders = skill.querySelectorAll('.skill-search');
                     for (const placeholder of placeholders) {
                         placeholder.classList.add('hidden');
                     }
                 }
+                console.log(`Reset search took: ${new Date().getTime() - st}ms`);
             } else {
                 for (const skill of skills) {
                     const searchValues = skill.getAttribute('data-searchable');
@@ -109,7 +111,11 @@ export const getHighlightedText = (text: string, searchTerm: string) => {
         .join('');
 };
 export const searchRow = (target: HTMLElement) => {
+    const start = new Date().getTime();
     const targetValue = localStorage.getItem('search')?.toLowerCase() || '';
+    if (!targetValue || targetValue === '') {
+        return;
+    }
     const valueItems = target.querySelectorAll('.skill-value');
     for (const valueItem of valueItems) {
         const item = valueItem as HTMLElement;
@@ -130,6 +136,7 @@ export const searchRow = (target: HTMLElement) => {
             placeholder?.classList.add('hidden');
         }
     }
+    console.log(`searchRow [${targetValue}] took: ${new Date().getTime() - start}ms`);
 };
 
 const rows = document.querySelectorAll('[data-active="true"]');
@@ -148,3 +155,4 @@ const io = new IntersectionObserver(
 );
 
 rows.forEach((r) => io.observe(r));
+localStorage.setItem('search', '');
