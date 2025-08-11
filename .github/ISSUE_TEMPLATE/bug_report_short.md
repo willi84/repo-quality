@@ -6,10 +6,10 @@ labels: bug
 assignees: ''
 ---
 
-## Bug
+## 📝 Description / Bug
 <!-- Clearly describe what happened. -->
 
-## Expected Behavior
+## ✅ Expected Behavior
 <!-- What should have happened instead? -->
 
 

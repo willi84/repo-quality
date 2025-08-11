@@ -6,16 +6,16 @@ labels: bug
 assignees: ''
 ---
 
-## Bug
+## 📝 Description / Bug
 <!-- Clearly describe what happened. -->
 
-## Steps to Reproduce
+## 🔁 Steps to Reproduce
 1. Go to '...'
 2. Click on '...'
 3. Scroll to '...'
 4. See error.
 
-## Expected Behavior
+## ✅ Expected Behavior
 <!-- What should have happened instead? -->
 
 

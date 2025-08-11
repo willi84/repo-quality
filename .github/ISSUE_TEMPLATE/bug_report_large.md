@@ -6,25 +6,25 @@ labels: bug
 assignees: ''
 ---
 
-## Bug
+## 📝 Description / Bug
 <!-- Clearly describe what happened. -->
 
-## Steps to Reproduce
+## 🔁 Steps to Reproduce
 1. Go to '...'
 2. Click on '...'
 3. Scroll to '...'
 4. See error.
 
-## Expected Behavior
+## ✅ Expected Behavior
 <!-- What should have happened instead? -->
 
-## Screenshots / Logs
+## 📷 Screenshots / Logs
 <!-- If possible, attach screenshots or relevant log output. -->
 
-## Environment
+## 💻 Environment
 - **OS:**
 - **Browser/Version:**
 - **Version/Commit:**
 
-## Additional Context
+## 📎 Additional Context
 <!-- Any other information that might help -->
