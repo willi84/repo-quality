@@ -1,5 +1,5 @@
 ---
-name: 🐞 Bug Report (large)
+name: 🐛 Bug Report (large)
 about: Report a problem so we can fix it
 title: "[BUG] Short description"
 labels: bug
