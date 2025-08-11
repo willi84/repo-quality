@@ -1,3 +1,4 @@
+import { DOM, DOMS } from './tools.d';
 const NUM_VALUES = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', ','];
 
 export const replaceAll = (
@@ -78,4 +79,14 @@ const clone = (val: any): any => {
     return val !== undefined && typeof val === 'object'
         ? JSON.parse(JSON.stringify(val))
         : val;
+};
+
+export const select = (query: string, target?: DOM): DOM => {
+    const base = target || document;
+    return base?.querySelector(query) as DOM;
+};
+
+export const selectAll = (query: string, target?: DOM): DOMS => {
+    const base = target || document;
+    return base?.querySelectorAll(query) as DOMS;
 };
