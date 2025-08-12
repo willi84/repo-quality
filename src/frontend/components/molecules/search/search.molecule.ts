@@ -144,13 +144,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const io = new IntersectionObserver(
         (entries) => {
             for (const entry of entries) {
-                entry.target.classList.toggle(
-                    'is-visible',
-                    entry.isIntersecting
-                );
-                // if isVisibel highlight search
-                if (entry.isIntersecting) {
-                    searchRow(entry.target as HTMLElement);
+                const verticalVisible =
+                    entry.intersectionRect.height > 0 &&
+                    entry.boundingClientRect.top < window.innerHeight &&
+                    entry.boundingClientRect.bottom > 0;
+
+                if (verticalVisible) {
+                    console.log('vertical fires');
+                    entry.target.classList.toggle('is-visible', entry.isIntersecting);
+
+                    if (entry.isIntersecting) {
+                        searchRow(entry.target as HTMLElement);
+                    }
                 }
             }
         },
