@@ -60,6 +60,7 @@
     "start_app:atomic": "npm run start_app -- atomic",
     "build:api": "npm run build_app -- api",
     "build:opencode": "npm run build_app -- opencode",
+    "build_force:opencode": "FORCE_UPDATE=true npm run build_app -- opencode",
     "start_app:check_urls": "npm run start_app -- check_urls",
     "build_all": "npm run build:api && npm run build:opencode && npm run build:vite && npm run build:eleventy",
     "build": "NODE_ENV=production npm run build_all",

@@ -33,6 +33,7 @@ export type CurlItem = {
     content: string;
     status: string;
     success: boolean;
+    time?: number; // Optional, for performance measurement
 };
 export type PROPERTY = {
     count: number;

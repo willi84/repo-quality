@@ -113,9 +113,11 @@ export const getData = (max: number, perPage: number = 100) => {
     return finalData;
 };
 const IS_DEV = process.env.NODE_ENV !== 'production';
+const FORCE_UPDATE = process.env.FORCE_UPDATE || false;
+console.log(`FORCE_UPDATE: ${FORCE_UPDATE}`);
 LOG.OK(`Running in ${IS_DEV ? 'development' : 'production'} mode.`);
 const MAX_PAGES = IS_DEV ? 3 : -1; // Limit to 10
-const getNew = IS_DEV ? !FS.exists(FILE) : true;
+const getNew = IS_DEV ? FORCE_UPDATE ? FORCE_UPDATE : !FS.exists(FILE) : true;
 if (getNew) {
     LOG.OK('Fetching new data from GitLab...');
     FS.removeFile(FILE);

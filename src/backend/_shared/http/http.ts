@@ -5,7 +5,7 @@
  * @version 1.0.0
  */
 
-import { CurlItem } from '../../apps/api.d';
+import { CurlItem } from '../../apps/api/index.d';
 import { HTTPStatusBase } from '../../index.d';
 import { command } from '../cmd/cmd';
 import { LOG } from '../log/log';
@@ -156,6 +156,7 @@ export const getResponse = (
     token: string,
     isDev: boolean
 ): CurlItem => {
+    const start = new Date().getTime();
     // const isGithub = url.indexOf('github.com') !== -1;
     const isGithubApi = url.indexOf('api.github.com') !== -1;
     const isGitlabApi = url.indexOf('gitlab') !== -1;
@@ -168,6 +169,7 @@ export const getResponse = (
             content: '',
             status: '0',
             success: false,
+            time: new Date().getTime() - start,
         };
     } else {
         // curl --header "PRIVATE-TOKEN: <your_personal_access_token>" "https://gitlab.com/api/v4/projects/123456/repository/files/README.md/raw?ref=main"
@@ -204,12 +206,13 @@ export const getResponse = (
         //         LOG.WARN('No rate limit information found in response headers');
         //     }
         // }
-
+        console.log(httpItem['time'])
         return {
             header: httpItem,
             content: content,
             status: status.toString(),
             success: success,
+            time: new Date().getTime() - start,
         };
     }
 };
